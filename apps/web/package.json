@@ -1,0 +1,25 @@
+{
+  "name": "@agendalab/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build --webpack",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@agendalab/contracts": "*",
+    "@fontsource/inter": "5.3.0",
+    "@uigovpe/components": "1.1.40",
+    "@uigovpe/styles": "1.1.21",
+    "next": "16.4.0",
+    "primeicons": "7.0.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}

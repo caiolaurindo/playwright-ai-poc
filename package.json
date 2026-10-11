@@ -1,0 +1,23 @@
+{
+  "name": "agendalab",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others -n API,WEB -c cyan,blue \"npm run dev -w @agendalab/api\" \"npm run dev -w @agendalab/web\"",
+    "build": "npm run build -w @agendalab/api && npm run build -w @agendalab/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "start": "concurrently --kill-others -n API,WEB -c cyan,blue \"npm run start -w @agendalab/api\" \"npm run start -w @agendalab/web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3",
+    "@types/node": "^22.19.0"
+  }
+}

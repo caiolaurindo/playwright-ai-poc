@@ -1,0 +1,10 @@
+node_modules/
+.next/
+dist/
+.npm-cache/
+.local-check/
+.env
+.env.local
+*.tsbuildinfo
+apps/api/data/
+*.log
