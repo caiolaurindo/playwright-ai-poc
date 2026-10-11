@@ -78,6 +78,16 @@ Também é possível executar separadamente com `npm run dev -w @agendalab/api` 
 
 Base local: `http://127.0.0.1:3001/api`.
 
+### Swagger
+
+Com `npm run dev` em execução, abra a documentação interativa em **http://localhost:3001/api/docs**. Ela também fica disponível pelo proxy do frontend em **http://localhost:3000/api/docs**.
+
+Os endpoints estão organizados em Sistema, Recursos e Reservas, com exemplos, parâmetros, schemas de entrada/saída e respostas de erro. Use **Try it out** e **Execute** para enviar requisições reais à API. Na criação de reservas, substitua a data do exemplo por uma data futura; o colaborador de demonstração é definido automaticamente pela API.
+
+A especificação OpenAPI em JSON está em **http://localhost:3001/api/docs-json** (ou na porta 3000 pelo proxy). Use o UUID retornado na criação ou em `/reservations/mine` para executar o cancelamento.
+
+### Endpoints
+
 | Método | Caminho                            | Ação                                        |
 | ------ | ---------------------------------- | ------------------------------------------- |
 | GET    | `/health`                          | Estado da API                               |
