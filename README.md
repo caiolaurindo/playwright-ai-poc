@@ -1,123 +1,273 @@
-# AgendaLab
+# AgendaLab: laboratório de testes automatizados com Playwright
 
-POC para estudar futuramente testes automatizados com Playwright. Nesta primeira etapa, o projeto contém somente a aplicação: Next.js, NestJS e SQLite, sem configuração, dependências ou arquivos de testes.
+Este repositório é um laboratório prático para aprender **testes automatizados com Playwright**. A aplicação usada nos estudos é o **AgendaLab**, um sistema de reserva de ambientes e equipamentos compartilhados: salas de reunião, projetores e notebooks.
 
-O frontend utiliza os componentes reais de `@uigovpe/components`, os estilos de `@uigovpe/styles`, `LayoutProvider`, `UiProvider`, `GovBar` e a fonte Inter distribuída localmente pelo Fontsource. A interface é inspirada no Governo de Pernambuco; este é um projeto de estudo com dados fictícios, sem vínculo institucional.
+A proposta é construir o aprendizado por etapas: conhecer os fluxos da aplicação, escrever os primeiros testes e evoluir a organização da suíte. Os cenários se aproximam de sistemas administrativos do setor público, para facilitar a aplicação dos conceitos no trabalho.
 
-## Requisitos e execução
+A aplicação utiliza **Next.js no frontend, NestJS na API e SQLite para persistência**, com a identidade visual do UI Kit do Governo de Pernambuco. Todos os dados são fictícios e o projeto não tem vínculo institucional.
 
-- Node.js **22.13 ou superior** (Node 22 LTS recomendado).
-- npm 10 ou superior.
+**Estado atual:** aplicação e Swagger implementados. A integração com Playwright é a próxima etapa; ainda não há dependência, configuração, arquivos ou comandos de testes no repositório.
 
-Na raiz do projeto:
+---
+
+## Sumário
+
+1. [Objetivo do laboratório](#1-objetivo-do-laboratório)
+2. [O que é Playwright](#2-o-que-é-playwright)
+3. [Como rodar](#3-como-rodar)
+4. [Experimente a aplicação](#4-experimente-a-aplicação)
+5. [Detalhes do Playwright](#5-detalhes-do-playwright)
+   - [5.1. Como instalar](#51-como-instalar)
+   - [5.2. Como são feitos os testes](#52-como-são-feitos-os-testes)
+   - [5.3. Ações básicas](#53-ações-básicas)
+   - [5.4. Asserções](#54-asserções)
+   - [5.5. Exemplo de testes explicado](#55-exemplo-de-testes-explicado)
+
+---
+
+## 1. Objetivo do laboratório
+
+Aprender a verificar o comportamento de uma aplicação real usando seus fluxos de negócio. O ponto de partida são quatro funcionalidades:
+
+| Funcionalidade                  | Comportamento esperado                                          |
+| ------------------------------- | --------------------------------------------------------------- |
+| Visualizar salas e equipamentos | Consultar os recursos disponíveis para uma data e um período    |
+| Criar uma reserva               | Preencher o formulário e confirmar a reserva de um recurso      |
+| Consultar minhas reservas       | Encontrar a reserva criada e acompanhar sua situação            |
+| Cancelar uma reserva            | Confirmar o cancelamento e liberar o período para outra reserva |
+
+O estudo vai incluir tanto os fluxos bem-sucedidos quanto situações como campos inválidos, conflitos de horário e listas sem resultados.
+
+---
+
+## 2. O que é Playwright
+
+O **Playwright Test** é um framework de testes de ponta a ponta para aplicações web. Ele permite automatizar ações no navegador e verificar seus resultados, com suporte a Chromium, Firefox e WebKit. Veja a [introdução oficial](https://playwright.dev/docs/intro).
+
+No AgendaLab, um teste de ponta a ponta poderá abrir o catálogo, reservar uma sala pelo formulário e conferir se a reserva aparece em **Minhas reservas**. Esse fluxo passa pela interface, pela API e pela persistência.
+
+Durante o estudo, vamos trabalhar com:
+
+- **Localizadores:** encontrar botões, campos e mensagens pela função e pelo nome apresentados ao usuário.
+- **Asserções:** verificar se a aplicação chegou ao resultado esperado.
+- **Isolamento:** preparar dados para que um teste não dependa da execução de outro.
+- **Diagnóstico de falhas:** investigar os passos da execução e os relatórios.
+
+A referência para essas escolhas será o guia de [boas práticas do Playwright](https://playwright.dev/docs/best-practices). A instalação e os exemplos executáveis serão adicionados quando começarmos a integrar a ferramenta.
+
+---
+
+## 3. Como rodar
+
+**Pré-requisitos da aplicação:** Node.js 22.13 ou superior e npm 10 ou superior.
+
+Na raiz do repositório:
 
 ```powershell
 npm install
 npm run dev
 ```
 
-Abra **http://localhost:3000**. O mesmo comando inicia o frontend na porta 3000 e a API na porta 3001. Use `Ctrl+C` para encerrar os dois processos.
+Depois, abra [http://localhost:3000](http://localhost:3000).
 
-O banco é criado e recebe nove recursos fictícios automaticamente na primeira inicialização. Nenhuma instalação de banco, chave externa ou login é necessária. As reservas persistem após reiniciar a aplicação.
+O comando inicia os dois aplicativos:
 
-As configurações padrão funcionam sem arquivos `.env`. Para alterar as portas ou o caminho do banco, copie `apps/api/.env.example` para `apps/api/.env` e `apps/web/.env.example` para `apps/web/.env.local`. Se mudar a porta da API, atualize também `API_URL` no frontend.
+| Aplicativo       | Porta | Endereço                                                             |
+| ---------------- | ----- | -------------------------------------------------------------------- |
+| Frontend Next.js | 3000  | [http://localhost:3000](http://localhost:3000)                       |
+| API NestJS       | 3001  | [http://localhost:3001/api/health](http://localhost:3001/api/health) |
+| Swagger da API   | 3001  | [http://localhost:3001/api/docs](http://localhost:3001/api/docs)     |
 
-## Funcionalidades
+O banco é criado automaticamente na primeira inicialização, com **seis salas, um projetor e dois notebooks**. Não é necessário instalar um servidor de banco de dados ou configurar um login. Use `Ctrl+C` para encerrar os processos.
 
-1. **Visualizar salas disponíveis:** catálogo com busca, tipo de recurso, capacidade, data e horário. Ao editar o período, clique em **Consultar disponibilidade** para aplicar. O período inicial é amanhã, das 09h às 10h.
-2. **Criar uma reserva:** escolha um recurso, título, data, horários e participantes. Observações são opcionais. Há seis salas, um projetor e dois notebooks.
-3. **Consultar minhas reservas:** acompanhe reservas próximas/em andamento, concluídas e canceladas, com busca pelo título ou recurso.
-4. **Cancelar uma reserva:** a confirmação preserva o histórico e libera o período para uma nova reserva.
-
-O colaborador é fixo: **Ana Silva**. A API define essa identidade e não aceita um identificador arbitrário no formulário. Esta POC não implementa autenticação nem múltiplos usuários.
-
-## Regras de reserva
-
-- Horários em **America/Sao_Paulo (Brasília, UTC−03)**, independentemente do fuso configurado na máquina.
-- Períodos entre **08h e 18h**, no mesmo dia, inclusive fins de semana.
-- O início precisa estar no futuro; o término deve ser posterior ao início.
-- Título de 3 a 120 caracteres; observações de até 500 caracteres.
-- Participantes entre 1 e a capacidade da sala; equipamento fica vinculado a um responsável.
-- Reservas confirmadas do mesmo recurso não podem se sobrepor. Uma reserva pode começar exatamente quando a anterior termina.
-- A consulta do catálogo é uma fotografia da disponibilidade: a API verifica o conflito novamente ao confirmar, dentro de uma transação SQLite.
-- Apenas reservas que ainda não começaram podem ser canceladas. Repetir o cancelamento de uma reserva já cancelada retorna o mesmo resultado.
-
-## Estrutura
-
-```text
-apps/
-  api/
-    src/
-      database/      # SQLite, esquema e recursos iniciais
-      resources/     # Consulta de disponibilidade
-      reservations/  # DTOs, regras e criação/cancelamento
-    data/            # Banco local gerado e ignorado pelo Git
-  web/
-    src/
-      app/           # Rotas Next.js e estilos globais
-      components/    # Catálogo, formulário e minhas reservas
-      lib/           # Cliente da API e datas
-packages/
-  contracts/         # Tipos compartilhados, sem código de execução
-```
-
-O navegador acessa `/api` no Next.js; um rewrite encaminha as requisições para o NestJS. As regras ficam no backend e os DTOs validam os dados recebidos. O SQLite nativo do Node evita dependências de compilação de banco no Windows. O Node 22 pode exibir um aviso sobre o caráter experimental de `node:sqlite`.
-
-## Comandos
+Também é possível iniciar os aplicativos separadamente, em dois terminais, a partir da raiz:
 
 ```powershell
-npm run dev        # Desenvolvimento dos dois aplicativos
-npm run typecheck  # Verificação de tipos TypeScript
-npm run build      # Compilação da API e do frontend
-npm start          # Executar as versões compiladas
+# Terminal 1: API
+npm run dev -w @agendalab/api
 ```
 
-Também é possível executar separadamente com `npm run dev -w @agendalab/api` e `npm run dev -w @agendalab/web`.
-
-## API
-
-Base local: `http://127.0.0.1:3001/api`.
-
-### Swagger
-
-Com `npm run dev` em execução, abra a documentação interativa em **http://localhost:3001/api/docs**. Ela também fica disponível pelo proxy do frontend em **http://localhost:3000/api/docs**.
-
-Os endpoints estão organizados em Sistema, Recursos e Reservas, com exemplos, parâmetros, schemas de entrada/saída e respostas de erro. Use **Try it out** e **Execute** para enviar requisições reais à API. Na criação de reservas, substitua a data do exemplo por uma data futura; o colaborador de demonstração é definido automaticamente pela API.
-
-A especificação OpenAPI em JSON está em **http://localhost:3001/api/docs-json** (ou na porta 3000 pelo proxy). Use o UUID retornado na criação ou em `/reservations/mine` para executar o cancelamento.
-
-### Endpoints
-
-| Método | Caminho                            | Ação                                        |
-| ------ | ---------------------------------- | ------------------------------------------- |
-| GET    | `/health`                          | Estado da API                               |
-| GET    | `/me`                              | Colaborador de demonstração                 |
-| GET    | `/resources?startAt=...&endAt=...` | Recursos com disponibilidade para o período |
-| GET    | `/reservations/mine`               | Reservas do colaborador atual               |
-| POST   | `/reservations`                    | Criar reserva                               |
-| PATCH  | `/reservations/:id/cancel`         | Cancelar reserva                            |
-
-`GET /resources` sem período mostra a disponibilidade no instante atual. Na consulta com período, informe ambos os parâmetros como datas ISO 8601 com fuso explícito; use `URLSearchParams` para codificar os valores.
-
-Exemplo de corpo de criação (substitua a data por uma data futura):
-
-```json
-{
-  "resourceId": "sala-capibaribe",
-  "title": "Alinhamento da equipe",
-  "participants": 4,
-  "startAt": "2027-01-12T09:00:00-03:00",
-  "endAt": "2027-01-12T10:00:00-03:00",
-  "notes": "Apresentação do planejamento"
-}
+```powershell
+# Terminal 2: frontend
+npm run dev -w @agendalab/web
 ```
 
-Respostas: `201` na criação, `200` nas consultas/cancelamento, `400` para dados inválidos, `404` para recurso/reserva inexistente e `409` para conflito de horário.
+---
 
-Para recomeçar com o catálogo inicial e sem reservas, encerre a API, faça uma cópia do banco se quiser preservar os dados e remova somente os arquivos de banco em `apps/api/data/`. Eles serão recriados na próxima execução.
+## 4. Experimente a aplicação
 
-## Próxima etapa
+Antes de automatizar, percorra o fluxo manualmente:
 
-A integração com Playwright fica para uma próxima etapa, após conhecer os fluxos da aplicação. Ainda não existe suíte de testes nem comando de testes neste projeto.
+1. Abra o catálogo. A consulta inicial considera **amanhã, das 09h às 10h**, e exibe salas de reunião.
+2. Altere a data ou os horários e clique em **Consultar disponibilidade**. A alteração dos campos só é aplicada à consulta depois desse clique.
+3. Busque uma sala pelo nome, filtre pela capacidade ou selecione projetores e notebooks no filtro de tipo.
+4. Clique em **Reservar** em um recurso disponível. Preencha o título, os participantes quando for uma sala e, se desejar, as observações. Confirme a reserva.
+5. Abra **Minhas reservas**. Localize a reserva pelo título ou pelo nome do recurso. A página separa reservas próximas/em andamento, concluídas e canceladas.
+6. Clique em **Cancelar reserva** e confirme. A reserva passa para a categoria **Canceladas**.
+7. Volte ao catálogo e consulte o mesmo período. O recurso deve estar disponível novamente, desde que não exista outra reserva confirmada nesse intervalo.
 
-Referências: [Next.js](https://nextjs.org/docs), [NestJS](https://docs.nestjs.com), [UI GovPE components](https://www.npmjs.com/package/@uigovpe/components), [UI GovPE styles](https://www.npmjs.com/package/@uigovpe/styles).
+O colaborador utilizado é **Ana Silva**, uma identidade fixa de demonstração. As reservas permanecem salvas quando a aplicação é reiniciada.
+
+---
+
+## 5. Detalhes do Playwright
+
+O Playwright é um framework para automação de testes **E2E (end-to-end, ou de ponta a ponta)**. Antes de começar a utilizá-lo, vamos conhecer a instalação e a estrutura básica de um teste: navegar, localizar elementos, interagir e verificar o resultado.
+
+### 5.1. Como instalar
+
+O comando abaixo inicializa um novo projeto com Playwright ou adiciona a ferramenta a um projeto existente:
+
+```powershell
+npm init playwright@latest
+```
+
+### 5.2. Como são feitos os testes
+
+Um teste de interface normalmente combina **navegação, localização de elementos, ações e asserções**.
+
+Primeiro, navegamos até a página que queremos testar:
+
+```typescript
+await page.goto("https://playwright.dev/");
+```
+
+Depois, localizamos os elementos com a API de **Locators**. Um localizador descreve como encontrar um elemento na página; neste exemplo, buscamos um link pelo seu papel e pelo nome acessível **Get started**:
+
+```typescript
+const getStarted = page.getByRole("link", { name: "Get started" });
+```
+
+Com o localizador, podemos executar uma ação, como clicar no link:
+
+```typescript
+await getStarted.click();
+```
+
+Também podemos localizar e interagir em uma única linha:
+
+```typescript
+await page.getByRole("link", { name: "Get started" }).click();
+```
+
+Após a interação, verificamos o resultado com uma asserção. Clicar em um link, por si só, não confirma que chegamos à página esperada.
+
+Para conhecer os tipos de localizadores disponíveis, consulte a [documentação de Locators](https://playwright.dev/docs/locators).
+
+### 5.3. Ações básicas
+
+As ações permitem interagir com os elementos localizados. Algumas das mais utilizadas são:
+
+| Ação                      | Descrição                                                   |
+| ------------------------- | ----------------------------------------------------------- |
+| `locator.check()`         | Marcar uma caixa de seleção ou selecionar um botão de opção |
+| `locator.click()`         | Clicar no elemento                                          |
+| `locator.uncheck()`       | Desmarcar uma caixa de seleção                              |
+| `locator.hover()`         | Posicionar o cursor sobre o elemento                        |
+| `locator.fill()`          | Preencher um campo de formulário                            |
+| `locator.focus()`         | Colocar o foco no elemento                                  |
+| `locator.press()`         | Pressionar uma tecla                                        |
+| `locator.setInputFiles()` | Selecionar arquivos em um campo de upload                   |
+| `locator.selectOption()`  | Selecionar uma opção em um elemento HTML `<select>`         |
+
+A tabela apresenta os nomes dos métodos. Alguns precisam de argumentos, como o texto a preencher ou a tecla a pressionar:
+
+```typescript
+await page.getByLabel("Nome").fill("Ana Silva");
+await page.getByLabel("Nome").press("Tab");
+```
+
+Para a lista completa, consulte a [API de Locator](https://playwright.dev/docs/api/class-locator).
+
+### 5.4. Asserções
+
+As **asserções** verificam se o resultado corresponde ao comportamento esperado. No Playwright Test, usamos `expect(valor)` seguido de um método que expressa essa expectativa.
+
+As asserções de página e de elementos mostradas abaixo são assíncronas: elas repetem a verificação até que a condição seja atendida ou o tempo limite seja atingido. Isso ajuda a lidar com atualizações da interface que não acontecem imediatamente.
+
+Por exemplo, esta asserção aguarda até que o título da página contenha **Playwright**:
+
+```typescript
+await expect(page).toHaveTitle(/Playwright/);
+```
+
+Algumas das asserções mais utilizadas são:
+
+| Asserção                                                      | O que verifica                                            |
+| ------------------------------------------------------------- | --------------------------------------------------------- |
+| `expect(locator).toBeChecked()`                               | A caixa de seleção ou o botão de opção está marcado       |
+| `expect(locator).toBeEnabled()`                               | O controle está habilitado                                |
+| `expect(locator).toBeVisible()`                               | O elemento está visível                                   |
+| `expect(locator).toContainText('Texto')`                      | O elemento contém o texto informado                       |
+| `expect(locator).toHaveAttribute('type', 'text')`             | O elemento possui o atributo com o valor informado        |
+| `expect(locator).toHaveCount(3)`                              | O localizador encontra a quantidade esperada de elementos |
+| `expect(locator).toHaveText('Texto esperado')`                | O conteúdo textual corresponde ao esperado                |
+| `expect(locator).toHaveValue('Ana Silva')`                    | O campo possui o valor informado                          |
+| `expect(page).toHaveTitle(/Playwright/)`                      | O título da página corresponde à expectativa              |
+| `expect(page).toHaveURL('https://playwright.dev/docs/intro')` | A página está na URL esperada                             |
+
+Os valores nos exemplos da tabela devem ser ajustados ao cenário do teste. Nas chamadas assíncronas, use `await`:
+
+```typescript
+await expect(page.getByLabel("Nome")).toHaveValue("Ana Silva");
+```
+
+Também existem asserções genéricas, como `toEqual`, `toContain` e `toBeTruthy`. Elas verificam valores já disponíveis de forma síncrona e não precisam de `await`:
+
+```typescript
+const success = true;
+expect(success).toBeTruthy();
+```
+
+Diferentemente das asserções de elementos, essa verificação não aguarda uma mudança de estado: ela verifica o valor que `success` possui naquele momento.
+
+Consulte a [documentação de asserções](https://playwright.dev/docs/test-assertions) para conhecer outras opções.
+
+### 5.5. Exemplo de testes explicado
+
+Os exemplos abaixo usam o site da documentação do Playwright para demonstrar a estrutura de dois testes independentes:
+
+```typescript
+import { test, expect } from "@playwright/test";
+
+test("a página tem o título esperado", async ({ page }) => {
+  await page.goto("https://playwright.dev/");
+
+  // Verifica se o título da página contém Playwright.
+  await expect(page).toHaveTitle(/Playwright/);
+});
+
+test("o link Get started leva à instalação", async ({ page }) => {
+  await page.goto("https://playwright.dev/");
+
+  // Localiza o link pelo papel e pelo nome acessível e clica nele.
+  await page.getByRole("link", { name: "Get started" }).click();
+
+  // Verifica se o título Installation está visível na página de destino.
+  await expect(
+    page.getByRole("heading", { name: "Installation" }),
+  ).toBeVisible();
+});
+```
+
+**O que as duas funções têm em comum:**
+
+- `test` declara um caso de teste; o primeiro argumento é o nome exibido nos resultados.
+- `expect` é usado para verificar o resultado esperado.
+- `async ({ page })` recebe a página fornecida pelo Playwright. Essa página permite navegar e interagir com o navegador durante o teste.
+- `await` aguarda a conclusão de cada navegação, ação ou asserção assíncrona antes de continuar.
+
+**Primeiro teste: verificar o título da página.**
+
+1. `page.goto()` abre a página inicial da documentação.
+2. `expect(page).toHaveTitle(/Playwright/)` verifica o título da aba do navegador. A expressão regular `/Playwright/` aceita um título que contenha esse termo; não exige que ele seja o texto inteiro.
+
+**Segundo teste: verificar a navegação pelo link.**
+
+1. O teste abre a página inicial novamente, sem depender da execução do primeiro teste.
+2. `getByRole('link', { name: 'Get started' })` localiza o link pelo papel e pelo nome acessível.
+3. `.click()` executa o clique.
+4. `getByRole('heading', { name: 'Installation' })` localiza o título na página de destino.
+5. `toBeVisible()` verifica se esse título está visível. Assim, o teste confirma o resultado da navegação.
+
+`toHaveTitle()` verifica o título da aba do navegador; `getByRole('heading')` encontra um título no conteúdo da página. São verificações diferentes.
