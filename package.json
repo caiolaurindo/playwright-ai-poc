@@ -16,8 +16,9 @@
     "start": "concurrently --kill-others -n API,WEB -c cyan,blue \"npm run start -w @agendalab/api\" \"npm run start -w @agendalab/web\""
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^22.20.5",
     "concurrently": "^9.2.1",
-    "typescript": "^5.9.3",
-    "@types/node": "^22.19.0"
+    "typescript": "^5.9.3"
   }
 }
