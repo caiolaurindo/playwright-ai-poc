@@ -6,7 +6,7 @@ A proposta é construir o aprendizado por etapas: conhecer os fluxos da aplicaç
 
 A aplicação utiliza **Next.js no frontend, NestJS na API e SQLite para persistência**, com a identidade visual do UI Kit do Governo de Pernambuco. Todos os dados são fictícios e o projeto não tem vínculo institucional.
 
-**Estado atual:** aplicação e Swagger implementados. A integração com Playwright é a próxima etapa; ainda não há dependência, configuração, arquivos ou comandos de testes no repositório.
+**Estado atual:** a aplicação, o Swagger e a integração inicial com Playwright estão implementados. O projeto já conta com arquivos de testes E2E, configuração dos navegadores e workflow no GitHub Actions.
 
 ---
 
@@ -14,14 +14,22 @@ A aplicação utiliza **Next.js no frontend, NestJS na API e SQLite para persist
 
 1. [Objetivo do laboratório](#1-objetivo-do-laboratório)
 2. [O que é Playwright](#2-o-que-é-playwright)
-3. [Como rodar](#3-como-rodar)
+3. [Como rodar a aplicação e a suíte](#3-como-rodar-a-aplicação-e-a-suíte)
 4. [Experimente a aplicação](#4-experimente-a-aplicação)
 5. [Detalhes do Playwright](#5-detalhes-do-playwright)
    - [5.1. Como instalar](#51-como-instalar)
-   - [5.2. Como são feitos os testes](#52-como-são-feitos-os-testes)
+   - [5.2. Navegação e localizadores](#52-navegação-e-localizadores)
    - [5.3. Ações básicas](#53-ações-básicas)
    - [5.4. Asserções](#54-asserções)
-   - [5.5. Exemplo de testes explicado](#55-exemplo-de-testes-explicado)
+   - [5.5. Exemplo de teste explicado](#55-exemplo-de-teste-explicado)
+   - [5.6. Gravar interações com o Codegen](#56-gravar-interações-com-o-codegen)
+   - [5.7. Executar testes na UI](#57-executar-testes-na-ui)
+   - [5.8. Preparar dados para repetir os testes](#58-preparar-dados-para-repetir-os-testes)
+6. [Testes E2E existentes](#6-testes-e2e-existentes)
+7. [Configuração do Playwright](#7-configuração-do-playwright)
+8. [Workflow do GitHub Actions](#8-workflow-do-github-actions)
+9. [Próximos ajustes](#9-próximos-ajustes)
+10. [Referências](#10-referências)
 
 ---
 
@@ -40,24 +48,24 @@ O estudo vai incluir tanto os fluxos bem-sucedidos quanto situações como campo
 
 ---
 
-## 2. O que é Playwright
+## 2. Fundamentos do Playwright
 
 O **Playwright Test** é um framework de testes de ponta a ponta para aplicações web. Ele permite automatizar ações no navegador e verificar seus resultados, com suporte a Chromium, Firefox e WebKit. Veja a [introdução oficial](https://playwright.dev/docs/intro).
 
-No AgendaLab, um teste de ponta a ponta poderá abrir o catálogo, reservar uma sala pelo formulário e conferir se a reserva aparece em **Minhas reservas**. Esse fluxo passa pela interface, pela API e pela persistência.
+No AgendaLab, o arquivo `e2e/novaReserva.spec.ts` já preenche e envia uma reserva pelo formulário. Um próximo passo é acrescentar a asserção que confira o resultado em **Minhas reservas**.
 
-Durante o estudo, vamos trabalhar com:
+Os conceitos principais para desenvolver essa suíte são:
 
 - **Localizadores:** encontrar botões, campos e mensagens pela função e pelo nome apresentados ao usuário.
 - **Asserções:** verificar se a aplicação chegou ao resultado esperado.
 - **Isolamento:** preparar dados para que um teste não dependa da execução de outro.
 - **Diagnóstico de falhas:** investigar os passos da execução e os relatórios.
 
-A referência para essas escolhas será o guia de [boas práticas do Playwright](https://playwright.dev/docs/best-practices). A instalação e os exemplos executáveis serão adicionados quando começarmos a integrar a ferramenta.
+A referência para essas escolhas será o guia de [boas práticas do Playwright](https://playwright.dev/docs/best-practices). A ferramenta já está instalada como dependência de desenvolvimento. Os testes E2E presentes no projeto estão descritos na [seção 4](#4-testes-e2e-existentes).
 
 ---
 
-## 3. Como rodar
+## 3. Como rodar a aplicação e a suíte
 
 **Pré-requisitos da aplicação:** Node.js 22.13 ou superior e npm 10 ou superior.
 
@@ -112,17 +120,17 @@ O colaborador utilizado é **Ana Silva**, uma identidade fixa de demonstração.
 
 ## 5. Detalhes do Playwright
 
-O Playwright é um framework para automação de testes **E2E (end-to-end, ou de ponta a ponta)**. Antes de começar a utilizá-lo, vamos conhecer a instalação e a estrutura básica de um teste: navegar, localizar elementos, interagir e verificar o resultado.
+Esta seção reúne os exemplos e as ferramentas usados para criar, executar e revisar testes E2E no AgendaLab.
 
 ### 5.1. Como instalar
 
-O comando abaixo inicializa um novo projeto com Playwright ou adiciona a ferramenta a um projeto existente:
+No AgendaLab, a dependência já está instalada. Para começar com Playwright em outro projeto, use:
 
 ```powershell
 npm init playwright@latest
 ```
 
-### 5.2. Como são feitos os testes
+### 5.2. Navegação e localizadores
 
 Um teste de interface normalmente combina **navegação, localização de elementos, ações e asserções**.
 
@@ -223,7 +231,7 @@ Diferentemente das asserções de elementos, essa verificação não aguarda uma
 
 Consulte a [documentação de asserções](https://playwright.dev/docs/test-assertions) para conhecer outras opções.
 
-### 5.5. Exemplo de testes explicado
+### 5.5. Exemplo de teste explicado
 
 Os exemplos abaixo usam o site da documentação do Playwright para demonstrar a estrutura de dois testes independentes:
 
@@ -271,3 +279,117 @@ test("o link Get started leva à instalação", async ({ page }) => {
 5. `toBeVisible()` verifica se esse título está visível. Assim, o teste confirma o resultado da navegação.
 
 `toHaveTitle()` verifica o título da aba do navegador; `getByRole('heading')` encontra um título no conteúdo da página. São verificações diferentes.
+
+### 5.6. Gravar interações com o Codegen
+
+O **Codegen** registra interações realizadas no navegador e gera código Playwright com os localizadores correspondentes. Para gravar um fluxo no AgendaLab, inicie a aplicação com `npm run dev` e execute este comando em outro terminal na raiz do repositório:
+
+```powershell
+npx playwright codegen http://localhost:3000
+```
+
+O navegador e o **Playwright Inspector** serão abertos. Percorra o fluxo que deseja automatizar e copie o código gerado para um arquivo em `e2e/`. Revise o resultado: gravações também podem incluir cliques e preenchimentos que não fazem parte do cenário esperado.
+
+![Playwright Codegen gravando o fluxo de reserva do AgendaLab e mostrando os localizadores gerados no Inspector](image.png)
+
+### 5.7. Executar testes na UI
+
+Para abrir a interface de execução, inicie a aplicação em um terminal e execute, na raiz do projeto:
+
+```powershell
+npx playwright test --ui
+```
+
+A UI permite selecionar e executar cenários, acompanhar as ações e consultar os detalhes de uma falha. Também é possível executar os testes diretamente no terminal:
+
+```powershell
+npx playwright test
+```
+
+A configuração atual executa os testes nos projetos Chromium, Firefox e WebKit. Para selecionar somente o Chromium:
+
+```powershell
+npx playwright test --project=chromium
+```
+
+Se os navegadores Playwright ainda não estiverem instalados nessa máquina:
+
+```powershell
+npx playwright install
+```
+
+### 5.8. Preparar dados para repetir os testes
+
+O fluxo de reserva grava dados de verdade no SQLite. Como o banco persiste entre execuções, repetir a reserva no mesmo recurso e período pode causar um conflito. O teste também usa uma data fixa; atualize-a quando passar ou se o horário já estiver ocupado.
+
+Uma estratégia de preparação e limpeza dos dados, com um banco separado para a suíte, permitirá repetir o cenário com mais facilidade.
+
+---
+
+## 6. Testes E2E existentes
+
+Os testes ficam no diretório `e2e/`:
+
+| Arquivo                   | Cenário                                                                                  | Observação                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `e2e/example.spec.ts`     | Abre a documentação do Playwright, verifica o título e acompanha o link **Get started**. | Depende de acesso à internet; não depende do AgendaLab.                                                         |
+| `e2e/novaReserva.spec.ts` | Abre o AgendaLab, seleciona uma sala, preenche o formulário e envia a reserva.           | Exemplo inicial gerado a partir de interações gravadas. Ainda não contém uma asserção que confirme o resultado. |
+
+O teste `novaReserva.spec.ts` reserva a **Sala Araripe** em **17 de outubro de 2026, das 13h às 15h**. Essa data está fixa no arquivo. A reserva também permanece no banco após a execução, então altere o período antes de repetir o cenário se a data já tiver passado ou se aquele horário estiver ocupado.
+
+---
+
+## 7. Configuração do Playwright
+
+O arquivo `playwright.config.ts` concentra as opções da suíte:
+
+| Opção           | Valor atual                                                   |
+| --------------- | ------------------------------------------------------------- |
+| `testDir`       | `./e2e`                                                       |
+| `fullyParallel` | `true`; os testes podem rodar em paralelo localmente.         |
+| `forbidOnly`    | Impede testes marcados com `test.only` no CI.                 |
+| `retries`       | 2 repetições no CI e nenhuma localmente.                      |
+| `workers`       | Um worker no CI; padrão do Playwright localmente.             |
+| `reporter`      | `html`, para gerar o relatório HTML.                          |
+| `trace`         | `on-first-retry`, para coletar o trace na primeira repetição. |
+| Projetos        | Chromium, Firefox e WebKit.                                   |
+
+As opções `baseURL` e `webServer` continuam comentadas. Por isso, o teste de reserva usa a URL completa `http://localhost:3000/`, e a aplicação precisa estar em execução antes dos testes E2E locais.
+
+---
+
+## 8. Workflow do GitHub Actions
+
+O workflow em `.github/workflows/playwright.yml` executa em `push` e `pull_request` direcionados às branches `main` e `master`. As etapas configuradas são:
+
+1. Preparar um runner Ubuntu e instalar a versão LTS do Node.js.
+2. Instalar as dependências do projeto com `npm ci`.
+3. Instalar os navegadores e suas dependências de sistema com `npx playwright install --with-deps`.
+4. Executar a suíte com `npx playwright test`.
+5. Enviar o relatório HTML como artefato, com retenção de 30 dias.
+
+---
+
+## 9. Próximos ajustes
+
+- **Iniciar a aplicação no CI:** o workflow não inicia o frontend nem a API, e a configuração `webServer` está comentada. Como `novaReserva.spec.ts` acessa `localhost:3000`, é preciso iniciar os dois aplicativos no workflow antes de executar esse cenário.
+- **Verificar a reserva criada:** `novaReserva.spec.ts` preenche e envia o formulário, mas ainda não confere o resultado com uma asserção.
+- **Deixar os dados repetíveis:** substituir a data fixa e preparar um banco isolado evita conflitos entre execuções.
+- **Revisar a execução paralela:** `fullyParallel` está ativado localmente. Ao adicionar cenários que reservem os mesmos recursos, prepare dados isolados para cada execução.
+
+---
+
+## 10. Referências
+
+- [Playwright: instalação](https://playwright.dev/docs/intro)
+- [Playwright: localizadores](https://playwright.dev/docs/locators)
+- [Playwright: API de Locator](https://playwright.dev/docs/api/class-locator)
+- [Playwright: asserções](https://playwright.dev/docs/test-assertions)
+- [Playwright: Codegen](https://playwright.dev/docs/codegen)
+- [Playwright: modo UI](https://playwright.dev/docs/test-ui-mode)
+- [Playwright: configuração](https://playwright.dev/docs/test-configuration)
+- [Next.js: documentação](https://nextjs.org/docs)
+- [NestJS: documentação](https://docs.nestjs.com)
+- [NestJS: Swagger e OpenAPI](https://docs.nestjs.com/openapi/introduction)
+- [UI GovPE: componentes](https://www.npmjs.com/package/@uigovpe/components)
+- [UI GovPE: estilos](https://www.npmjs.com/package/@uigovpe/styles)
