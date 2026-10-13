@@ -13,22 +13,27 @@ A aplicação utiliza **Next.js no frontend, NestJS na API e SQLite para persist
 ## Sumário
 
 1. [Objetivo do laboratório](#1-objetivo-do-laboratório)
-2. [O que é Playwright](#2-o-que-é-playwright)
+2. [Fundamentos do Playwright](#2-fundamentos-do-playwright)
 3. [Como rodar a aplicação e a suíte](#3-como-rodar-a-aplicação-e-a-suíte)
 4. [Experimente a aplicação](#4-experimente-a-aplicação)
-5. [Detalhes do Playwright](#5-detalhes-do-playwright)
-   - [5.1. Como instalar](#51-como-instalar)
-   - [5.2. Navegação e localizadores](#52-navegação-e-localizadores)
-   - [5.3. Ações básicas](#53-ações-básicas)
-   - [5.4. Asserções](#54-asserções)
-   - [5.5. Exemplo de teste explicado](#55-exemplo-de-teste-explicado)
-   - [5.6. Gravar interações com o Codegen](#56-gravar-interações-com-o-codegen)
-   - [5.7. Executar testes na UI](#57-executar-testes-na-ui)
-   - [5.8. Preparar dados para repetir os testes](#58-preparar-dados-para-repetir-os-testes)
-6. [Testes E2E existentes](#6-testes-e2e-existentes)
-7. [Configuração do Playwright](#7-configuração-do-playwright)
-8. [Workflow do GitHub Actions](#8-workflow-do-github-actions)
-9. [Próximos ajustes](#9-próximos-ajustes)
+5. [Tutorial: gravar e executar um teste de reserva](#5-tutorial-gravar-e-executar-um-teste-de-reserva)
+6. [Detalhes do Playwright](#6-detalhes-do-playwright)
+   - [6.1. Como instalar](#61-como-instalar)
+   - [6.2. Navegação e localizadores](#62-navegação-e-localizadores)
+   - [6.3. Ações básicas](#63-ações-básicas)
+   - [6.4. Asserções](#64-asserções)
+   - [6.5. Exemplo de teste explicado](#65-exemplo-de-teste-explicado)
+   - [6.6. Gravar interações com o Codegen](#66-gravar-interações-com-o-codegen)
+   - [6.7. Executar testes na UI](#67-executar-testes-na-ui)
+   - [6.8. Preparar dados para repetir os testes](#68-preparar-dados-para-repetir-os-testes)
+7. [Testes E2E existentes](#7-testes-e2e-existentes)
+8. [Configuração do Playwright](#8-configuração-do-playwright)
+9. [Tutorial prático: gravar e executar um teste real](#9-tutorial-prático-gravar-e-executar-um-teste-real)
+   - [9.1. Preparar o projeto](#91-preparar-o-projeto)
+   - [9.2. Iniciar a aplicação e explorar os testes](#92-iniciar-a-aplicação-e-explorar-os-testes)
+   - [9.3. Gravar a reserva da Sala Frevo](#93-gravar-a-reserva-da-sala-frevo)
+   - [9.4. Salvar e executar o teste](#94-salvar-e-executar-o-teste)
+   - [9.5. Ajustar os dados para repetir](#95-ajustar-os-dados-para-repetir)
 10. [Referências](#10-referências)
 
 ---
@@ -61,7 +66,7 @@ Os conceitos principais para desenvolver essa suíte são:
 - **Isolamento:** preparar dados para que um teste não dependa da execução de outro.
 - **Diagnóstico de falhas:** investigar os passos da execução e os relatórios.
 
-A referência para essas escolhas será o guia de [boas práticas do Playwright](https://playwright.dev/docs/best-practices). A ferramenta já está instalada como dependência de desenvolvimento. Os testes E2E presentes no projeto estão descritos na [seção 4](#4-testes-e2e-existentes).
+A referência para essas escolhas será o guia de [boas práticas do Playwright](https://playwright.dev/docs/best-practices). A ferramenta já está instalada como dependência de desenvolvimento. Os testes E2E presentes no projeto estão descritos na [seção 7](#7-testes-e2e-existentes).
 
 ---
 
@@ -118,11 +123,72 @@ O colaborador utilizado é **Ana Silva**, uma identidade fixa de demonstração.
 
 ---
 
-## 5. Detalhes do Playwright
+## 5. Tutorial: gravar e executar um teste de reserva
+
+Este roteiro acompanha um fluxo real do AgendaLab: clonar o repositório, explorar os testes existentes e gravar um novo teste de reserva usando o Codegen.
+
+### 5.1. Preparar o projeto
+
+Clone o repositório e entre na pasta criada. Substitua `<URL_DO_REPOSITORIO>` pelo endereço do repositório:
+
+```powershell
+git clone <URL_DO_REPOSITORIO> AgendaLab
+cd AgendaLab
+npm ci
+npx playwright install
+```
+
+O projeto requer Node.js 22.13 ou superior e npm 10 ou superior. `npm ci` instala as dependências registradas no lockfile, e `npx playwright install` baixa os navegadores usados localmente.
+
+### 5.2. Iniciar a aplicação e explorar os testes
+
+Em um terminal, inicie a aplicação e mantenha esse terminal aberto:
+
+```powershell
+npm run dev
+```
+
+Em outro terminal, na raiz do repositório, abra a interface de testes:
+
+```powershell
+npx playwright test --ui
+```
+
+Selecione e execute os testes disponíveis para conhecer a interface, acompanhar as ações e consultar os resultados. Os testes do AgendaLab acessam `http://localhost:3000`, por isso a aplicação precisa estar rodando antes da execução.
+
+### 5.3. Gravar uma reserva na Sala Frevo
+
+Com a aplicação ainda rodando, execute em outro terminal:
+
+```powershell
+npx playwright codegen http://localhost:3000
+```
+
+Na página inicial, clique no card ou link **Ambientes e equipamentos**. Na lista de salas, localize a **Sala Frevo** e clique em **Reservar**. No formulário de nova reserva, preencha os campos apresentados um a um e clique em **Confirmar reserva**. Depois de concluir o fluxo, encerre a gravação e revise o código gerado no Playwright Inspector.
+
+### 5.4. Salvar e executar o teste gravado
+
+Copie o código gerado para um novo arquivo dentro de `e2e/`, com um nome terminado em `.spec.ts`, por exemplo `e2e/novaReservaFrevo.spec.ts`. Abra o arquivo no VS Code e revise as ações gravadas antes de executar.
+
+Volte à interface de testes e execute o novo arquivo. Também é possível executá-lo diretamente no terminal:
+
+```powershell
+npx playwright test e2e/novaReservaFrevo.spec.ts --project=chromium
+```
+
+A gravação cria ações de navegação e preenchimento. Confira o código e acrescente as asserções necessárias para verificar se a reserva foi confirmada e aparece no resultado esperado.
+
+### 5.5. Ajustar os dados antes de repetir
+
+Antes de executar o cenário novamente, altere os dados da reserva, principalmente a data, e escolha um período futuro disponível. O banco SQLite mantém as reservas entre execuções; portanto, repetir os mesmos dados pode encontrar um horário ocupado. Este tutorial ainda não prepara dados diferentes automaticamente nem limpa as reservas criadas.
+
+---
+
+## 6. Detalhes do Playwright
 
 Esta seção reúne os exemplos e as ferramentas usados para criar, executar e revisar testes E2E no AgendaLab.
 
-### 5.1. Como instalar
+### 6.1. Como instalar
 
 No AgendaLab, a dependência já está instalada. Para começar com Playwright em outro projeto, use:
 
@@ -130,7 +196,7 @@ No AgendaLab, a dependência já está instalada. Para começar com Playwright e
 npm init playwright@latest
 ```
 
-### 5.2. Navegação e localizadores
+### 6.2. Navegação e localizadores
 
 Um teste de interface normalmente combina **navegação, localização de elementos, ações e asserções**.
 
@@ -162,7 +228,7 @@ Após a interação, verificamos o resultado com uma asserção. Clicar em um li
 
 Para conhecer os tipos de localizadores disponíveis, consulte a [documentação de Locators](https://playwright.dev/docs/locators).
 
-### 5.3. Ações básicas
+### 6.3. Ações básicas
 
 As ações permitem interagir com os elementos localizados. Algumas das mais utilizadas são:
 
@@ -187,7 +253,7 @@ await page.getByLabel("Nome").press("Tab");
 
 Para a lista completa, consulte a [API de Locator](https://playwright.dev/docs/api/class-locator).
 
-### 5.4. Asserções
+### 6.4. Asserções
 
 As **asserções** verificam se o resultado corresponde ao comportamento esperado. No Playwright Test, usamos `expect(valor)` seguido de um método que expressa essa expectativa.
 
@@ -231,7 +297,7 @@ Diferentemente das asserções de elementos, essa verificação não aguarda uma
 
 Consulte a [documentação de asserções](https://playwright.dev/docs/test-assertions) para conhecer outras opções.
 
-### 5.5. Exemplo de teste explicado
+### 6.5. Exemplo de teste explicado
 
 Os exemplos abaixo usam o site da documentação do Playwright para demonstrar a estrutura de dois testes independentes:
 
@@ -280,7 +346,7 @@ test("o link Get started leva à instalação", async ({ page }) => {
 
 `toHaveTitle()` verifica o título da aba do navegador; `getByRole('heading')` encontra um título no conteúdo da página. São verificações diferentes.
 
-### 5.6. Gravar interações com o Codegen
+### 6.6. Gravar interações com o Codegen
 
 O **Codegen** registra interações realizadas no navegador e gera código Playwright com os localizadores correspondentes. Para gravar um fluxo no AgendaLab, inicie a aplicação com `npm run dev` e execute este comando em outro terminal na raiz do repositório:
 
@@ -292,7 +358,7 @@ O navegador e o **Playwright Inspector** serão abertos. Percorra o fluxo que de
 
 ![Playwright Codegen gravando o fluxo de reserva do AgendaLab e mostrando os localizadores gerados no Inspector](image.png)
 
-### 5.7. Executar testes na UI
+### 6.7. Executar testes na UI
 
 Para abrir a interface de execução, inicie a aplicação em um terminal e execute, na raiz do projeto:
 
@@ -318,7 +384,7 @@ Se os navegadores Playwright ainda não estiverem instalados nessa máquina:
 npx playwright install
 ```
 
-### 5.8. Preparar dados para repetir os testes
+### 6.8. Preparar dados para repetir os testes
 
 O fluxo de reserva grava dados de verdade no SQLite. Como o banco persiste entre execuções, repetir a reserva no mesmo recurso e período pode causar um conflito. O teste também usa uma data fixa; atualize-a quando passar ou se o horário já estiver ocupado.
 
@@ -326,58 +392,93 @@ Uma estratégia de preparação e limpeza dos dados, com um banco separado para 
 
 ---
 
-## 6. Testes E2E existentes
+## 7. Testes E2E existentes
 
 Os testes ficam no diretório `e2e/`:
 
-| Arquivo                   | Cenário                                                                                  | Observação                                                                                                      |
-| ------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `e2e/example.spec.ts`     | Abre a documentação do Playwright, verifica o título e acompanha o link **Get started**. | Depende de acesso à internet; não depende do AgendaLab.                                                         |
-| `e2e/novaReserva.spec.ts` | Abre o AgendaLab, seleciona uma sala, preenche o formulário e envia a reserva.           | Exemplo inicial gerado a partir de interações gravadas. Ainda não contém uma asserção que confirme o resultado. |
+| Arquivo                            | Cenário                                                                                   | Observação                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `e2e/example.spec.ts`              | Abre a documentação do Playwright, verifica o título e acompanha o link **Get started**.  | Depende de acesso à internet; não depende do AgendaLab.                                                           |
+| `e2e/novaReserva.spec.ts`          | Seleciona a Sala Araripe, preenche o formulário e envia uma reserva.                      | Usa data e horário fixos; ainda não contém uma asserção que confirme o resultado da reserva.                      |
+| `e2e/minhasReservas.spec.ts`       | Abre **Minhas reservas**, percorre as categorias e cancela reservas.                     | Depende de reservas existentes, incluindo registros em 14 e 17 de outubro de 2026; os dados são persistidos.     |
+| `e2e/disponibilidade.spec.ts`     | Altera a data e o horário e consulta a disponibilidade.                                  | Usa 15 de outubro de 2026, das 11h às 13h; ainda não verifica o resultado com uma asserção.                       |
 
-O teste `novaReserva.spec.ts` reserva a **Sala Araripe** em **17 de outubro de 2026, das 13h às 15h**. Essa data está fixa no arquivo. A reserva também permanece no banco após a execução, então altere o período antes de repetir o cenário se a data já tiver passado ou se aquele horário estiver ocupado.
+O teste `novaReserva.spec.ts` reserva a **Sala Araripe** em **17 de outubro de 2026, das 13h às 15h**. Essa data está fixa no arquivo. A reserva permanece no banco após a execução. Os testes `minhasReservas.spec.ts` e `disponibilidade.spec.ts` também usam datas fixas. Como os cenários de reserva e cancelamento dependem dos dados persistidos, prepare os registros necessários e ajuste as datas e os horários antes de repetir os fluxos.
 
----
-
-## 7. Configuração do Playwright
-
-O arquivo `playwright.config.ts` concentra as opções da suíte:
-
-| Opção           | Valor atual                                                   |
-| --------------- | ------------------------------------------------------------- |
-| `testDir`       | `./e2e`                                                       |
-| `fullyParallel` | `true`; os testes podem rodar em paralelo localmente.         |
-| `forbidOnly`    | Impede testes marcados com `test.only` no CI.                 |
-| `retries`       | 2 repetições no CI e nenhuma localmente.                      |
-| `workers`       | Um worker no CI; padrão do Playwright localmente.             |
-| `reporter`      | `html`, para gerar o relatório HTML.                          |
-| `trace`         | `on-first-retry`, para coletar o trace na primeira repetição. |
-| Projetos        | Chromium, Firefox e WebKit.                                   |
-
-As opções `baseURL` e `webServer` continuam comentadas. Por isso, o teste de reserva usa a URL completa `http://localhost:3000/`, e a aplicação precisa estar em execução antes dos testes E2E locais.
+Os testes gravados de reserva, disponibilidade e cancelamento ainda executam principalmente ações de interface. Eles precisam de asserções para confirmar os resultados esperados.
 
 ---
 
-## 8. Workflow do GitHub Actions
+## 8. Configuração do Playwright
 
-O workflow em `.github/workflows/playwright.yml` executa em `push` e `pull_request` direcionados às branches `main` e `master`. As etapas configuradas são:
+A configuração fica em `playwright.config.ts` e procura os testes no diretório `e2e/`. Ela define projetos para Chromium, Firefox e WebKit, usa o relatório HTML e registra o trace na primeira repetição de uma falha.
 
-1. Preparar um runner Ubuntu e instalar a versão LTS do Node.js.
-2. Instalar as dependências do projeto com `npm ci`.
-3. Instalar os navegadores e suas dependências de sistema com `npx playwright install --with-deps`.
-4. Executar a suíte com `npx playwright test`.
-5. Enviar o relatório HTML como artefato, com retenção de 30 dias.
+O servidor local precisa ser iniciado antes de executar a suíte: a opção `webServer` está comentada e a `baseURL` também. Por isso, os testes navegam para `http://localhost:3000` e usam URLs explícitas. A execução local não tem repetição automática; no CI, há até duas tentativas e um worker.
 
----
+## 9. Tutorial prático: gravar e executar um teste real
 
-## 9. Próximos ajustes
+Neste exercício, você vai explorar a interface de testes, gravar um fluxo de reserva na Sala Frevo com o Codegen e salvar o código gerado como um teste E2E do AgendaLab.
 
-- **Iniciar a aplicação no CI:** o workflow não inicia o frontend nem a API, e a configuração `webServer` está comentada. Como `novaReserva.spec.ts` acessa `localhost:3000`, é preciso iniciar os dois aplicativos no workflow antes de executar esse cenário.
-- **Verificar a reserva criada:** `novaReserva.spec.ts` preenche e envia o formulário, mas ainda não confere o resultado com uma asserção.
-- **Deixar os dados repetíveis:** substituir a data fixa e preparar um banco isolado evita conflitos entre execuções.
-- **Revisar a execução paralela:** `fullyParallel` está ativado localmente. Ao adicionar cenários que reservem os mesmos recursos, prepare dados isolados para cada execução.
+### 9.1. Preparar o projeto
 
----
+Clone o repositório, entre na pasta criada e instale as dependências e os navegadores do Playwright. Substitua `<URL_DO_REPOSITORIO>` pelo endereço do repositório:
+
+```powershell
+git clone <URL_DO_REPOSITORIO> AgendaLab
+cd AgendaLab
+npm ci
+npx playwright install
+```
+
+O projeto requer Node.js 22.13 ou superior e npm 10 ou superior. `npm ci` instala as dependências registradas no lockfile, e `npx playwright install` baixa os navegadores usados localmente.
+
+### 9.2. Iniciar a aplicação e explorar os testes
+
+Em um terminal, inicie a aplicação e mantenha esse terminal aberto:
+
+```powershell
+npm run dev
+```
+
+Em outro terminal, na raiz do repositório, abra a interface de testes:
+
+```powershell
+npx playwright test --ui
+```
+
+Selecione e execute os testes disponíveis para conhecer a interface, acompanhar as ações e consultar os resultados. Os testes do AgendaLab acessam `http://localhost:3000`, por isso a aplicação precisa estar rodando antes da execução.
+
+### 9.3. Gravar a reserva da Sala Frevo
+
+Com a aplicação ainda rodando, abra outro terminal na raiz do repositório e inicie o Codegen:
+
+```powershell
+npx playwright codegen http://localhost:3000
+```
+
+No navegador aberto pelo Codegen, siga este fluxo:
+
+1. Na página inicial, clique no card **Ambientes e equipamentos**.
+2. Na lista de salas, localize a **Sala Frevo** e clique em **Reservar**.
+3. No formulário de nova reserva, preencha cada campo apresentado.
+4. Clique em **Confirmar reserva**.
+5. Encerre a gravação e revise o código gerado no Playwright Inspector.
+
+### 9.4. Salvar e executar o teste
+
+Copie o código gerado para um novo arquivo dentro de `e2e/`, com um nome terminado em `.spec.ts`, por exemplo `e2e/novaReservaFrevo.spec.ts`. No VS Code, revise as ações gravadas antes de executar.
+
+Volte à interface de testes e execute o novo arquivo. Também é possível executá-lo diretamente no terminal:
+
+```powershell
+npx playwright test e2e/novaReservaFrevo.spec.ts --project=chromium
+```
+
+A gravação cria ações de navegação e preenchimento. Confira o código e acrescente as asserções necessárias para verificar se a reserva foi confirmada e aparece no resultado esperado.
+
+### 9.5. Ajustar os dados para repetir
+
+Antes de executar o cenário novamente, altere os dados da reserva, principalmente a data, e escolha um período futuro disponível. O banco SQLite mantém as reservas entre execuções; portanto, repetir os mesmos dados pode encontrar um horário ocupado. Este tutorial ainda não prepara dados diferentes automaticamente nem limpa as reservas criadas.
 
 ## 10. Referências
 
