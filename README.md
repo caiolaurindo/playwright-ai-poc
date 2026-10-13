@@ -93,6 +93,8 @@ O comando inicia os dois aplicativos:
 
 O banco é criado automaticamente na primeira inicialização, com **seis salas, um projetor e dois notebooks**. Não é necessário instalar um servidor de banco de dados ou configurar um login. Use `Ctrl+C` para encerrar os processos.
 
+Para apagar todas as reservas sem parar a API, execute `npm run db:reset` na raiz do projeto. Os recursos cadastrados são mantidos.
+
 Também é possível iniciar os aplicativos separadamente, em dois terminais, a partir da raiz:
 
 ```powershell
