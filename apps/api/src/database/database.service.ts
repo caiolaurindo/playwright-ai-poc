@@ -33,10 +33,21 @@ export class DatabaseService implements OnModuleDestroy {
         id TEXT PRIMARY KEY, resourceId TEXT NOT NULL REFERENCES resources(id),
         collaboratorId TEXT NOT NULL, title TEXT NOT NULL, notes TEXT NOT NULL,
         participants INTEGER NOT NULL, startAt TEXT NOT NULL, endAt TEXT NOT NULL,
-        status TEXT NOT NULL CHECK(status IN ('confirmed', 'cancelled')), createdAt TEXT NOT NULL
+        status TEXT NOT NULL CHECK(status IN ('confirmed', 'cancelled')), createdAt TEXT NOT NULL,
+        organization TEXT NOT NULL DEFAULT 'Perpart',
+        requestType TEXT NOT NULL DEFAULT 'Reunião interna', requestDetail TEXT NOT NULL DEFAULT ''
       );
       CREATE INDEX IF NOT EXISTS reservations_period ON reservations(resourceId, status, startAt, endAt);
     `);
+    const reservationColumns = this.db
+      .prepare("PRAGMA table_info(reservations)")
+      .all() as { name: string }[];
+    if (!reservationColumns.some((column) => column.name === "organization"))
+      this.db.exec("ALTER TABLE reservations ADD COLUMN organization TEXT NOT NULL DEFAULT 'Perpart'");
+    if (!reservationColumns.some((column) => column.name === "requestType"))
+      this.db.exec("ALTER TABLE reservations ADD COLUMN requestType TEXT NOT NULL DEFAULT 'Reunião interna'");
+    if (!reservationColumns.some((column) => column.name === "requestDetail"))
+      this.db.exec("ALTER TABLE reservations ADD COLUMN requestDetail TEXT NOT NULL DEFAULT ''");
     const insert = this.db.prepare(
       "INSERT OR IGNORE INTO resources VALUES (?, ?, ?, ?, ?, ?, ?)",
     );

@@ -24,6 +24,8 @@ export class ReservationsService {
   }
 
   create(dto: CreateReservationDto) {
+    if (dto.requestType !== "Reunião interna" && !dto.requestDetail?.trim())
+      throw new BadRequestException("Informe o detalhe solicitado para este tipo de solicitação.");
     const resource = this.database.resource(dto.resourceId);
     if (!resource) throw new NotFoundException("Recurso não encontrado.");
     if (dto.participants > resource.capacity)
@@ -38,6 +40,9 @@ export class ReservationsService {
       resourceId: dto.resourceId,
       collaboratorId: DEMO_COLLABORATOR.id,
       title: dto.title,
+      organization: dto.organization,
+      requestType: dto.requestType,
+      requestDetail: dto.requestDetail?.trim() ?? "",
       notes: dto.notes?.trim() ?? "",
       participants: dto.participants,
       ...period,
@@ -55,7 +60,7 @@ export class ReservationsService {
         );
       this.database.db
         .prepare(
-          "INSERT INTO reservations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+          "INSERT INTO reservations (id, resourceId, collaboratorId, title, notes, participants, startAt, endAt, status, createdAt, organization, requestType, requestDetail) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .run(
           reservation.id,
@@ -68,6 +73,9 @@ export class ReservationsService {
           reservation.endAt,
           reservation.status,
           reservation.createdAt,
+          reservation.organization,
+          reservation.requestType,
+          reservation.requestDetail,
         );
       this.database.db.exec("COMMIT");
     } catch (error) {

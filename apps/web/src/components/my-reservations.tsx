@@ -75,7 +75,7 @@ export function MyReservations() {
                   : new Date(item.endAt).getTime() <= now);
           return (
             match &&
-            `${item.title} ${item.resource.name}`
+            `${item.title} ${item.resource.name} ${item.organization} ${item.requestType} ${item.requestDetail}`
               .toLocaleLowerCase("pt-BR")
               .includes(search.toLocaleLowerCase("pt-BR").trim())
           );
@@ -298,6 +298,10 @@ export function MyReservations() {
                         : "Equipamento"}
                     </p>
                     <small>{item.resource.location}</small>
+                    <small>
+                      {item.organization} · {item.requestType}
+                      {item.requestDetail ? ` · ${item.requestDetail}` : ""}
+                    </small>
                     {item.notes && (
                       <p className="reservation-notes">{item.notes}</p>
                     )}

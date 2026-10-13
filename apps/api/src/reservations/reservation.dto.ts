@@ -1,5 +1,6 @@
 import {
   IsInt,
+  IsIn,
   IsISO8601,
   IsOptional,
   IsString,
@@ -11,6 +12,22 @@ import { Transform } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateReservationDto {
+  @ApiProperty({ enum: ["Perpart", "Seduh"] })
+  @IsIn(["Perpart", "Seduh"])
+  organization!: "Perpart" | "Seduh";
+
+  @ApiProperty({
+    enum: ["Reunião interna", "Atendimento externo", "Capacitação"],
+  })
+  @IsIn(["Reunião interna", "Atendimento externo", "Capacitação"])
+  requestType!: "Reunião interna" | "Atendimento externo" | "Capacitação";
+
+  @ApiPropertyOptional({ maxLength: 120 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  requestDetail?: string;
+
   @ApiProperty({
     example: "sala-capibaribe",
     minLength: 1,

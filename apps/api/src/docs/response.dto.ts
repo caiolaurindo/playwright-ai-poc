@@ -75,6 +75,18 @@ export class ReservationResponseDto implements Reservation {
   @ApiProperty({ example: "Alinhamento da equipe" })
   title!: string;
 
+  @ApiProperty({ enum: ["Perpart", "Seduh"], example: "Perpart" })
+  organization!: Reservation["organization"];
+
+  @ApiProperty({
+    enum: ["Reunião interna", "Atendimento externo", "Capacitação"],
+    example: "Reunião interna",
+  })
+  requestType!: Reservation["requestType"];
+
+  @ApiProperty({ example: "Secretaria de Administração" })
+  requestDetail!: string;
+
   @ApiProperty({
     example: "Apresentação do planejamento",
     description: "String vazia quando não informada.",

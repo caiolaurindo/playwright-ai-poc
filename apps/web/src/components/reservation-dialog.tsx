@@ -18,6 +18,16 @@ import { api } from "@/lib/api";
 import { localDate, periodError, toTimestamp } from "@/lib/dates";
 import { Feedback } from "./feedback";
 
+const ORGANIZATIONS = [
+  { label: "Perpart", value: "Perpart" },
+  { label: "Seduh", value: "Seduh" },
+];
+const REQUEST_TYPES = [
+  { label: "Reunião interna", value: "Reunião interna" },
+  { label: "Atendimento externo", value: "Atendimento externo" },
+  { label: "Capacitação", value: "Capacitação" },
+];
+
 export interface Period {
   date: string;
   start: string;
@@ -44,6 +54,13 @@ export function ReservationDialog({
       "",
   );
   const [title, setTitle] = useState("");
+  const [organization, setOrganization] = useState<"Perpart" | "Seduh">(
+    "Perpart",
+  );
+  const [requestType, setRequestType] = useState<
+    "Reunião interna" | "Atendimento externo" | "Capacitação"
+  >("Reunião interna");
+  const [requestDetail, setRequestDetail] = useState("");
   const [notes, setNotes] = useState("");
   const [participants, setParticipants] = useState<number | null>(1);
   const [period, setPeriod] = useState(initial);
@@ -80,6 +97,9 @@ export function ReservationDialog({
     const payload: CreateReservation = {
       resourceId,
       title: title.trim(),
+      organization,
+      requestType,
+      requestDetail: requestDetail.trim(),
       notes: notes.trim(),
       participants,
       startAt: toTimestamp(period.date, period.start),
@@ -121,6 +141,48 @@ export function ReservationDialog({
         Escolha o recurso e o período. Sua reserva será confirmada na hora.
       </p>
       <form onSubmit={submit} className="reservation-form">
+        <Dropdown
+          inputId="reserva-organizacao"
+          label="Organização *"
+          value={organization}
+          options={ORGANIZATIONS}
+          onChange={(event) =>
+            setOrganization(event.value as "Perpart" | "Seduh")
+          }
+          disabled={busy}
+        />
+        <Dropdown
+          inputId="reserva-tipo-solicitacao"
+          label="Tipo de solicitação *"
+          value={requestType}
+          options={REQUEST_TYPES}
+          onChange={(event) => {
+            setRequestType(event.value as typeof requestType);
+            setRequestDetail("");
+          }}
+          disabled={busy}
+        />
+        {requestType !== "Reunião interna" && (
+          <InputText
+            inputId="reserva-detalhe-solicitacao"
+            label={
+              requestType === "Atendimento externo"
+                ? "Órgão ou entidade visitante *"
+                : "Tema da capacitação *"
+            }
+            placeholder={
+              requestType === "Atendimento externo"
+                ? "Ex.: Secretaria de Administração"
+                : "Ex.: Acessibilidade digital"
+            }
+            value={requestDetail}
+            onChange={(event) => setRequestDetail(event.target.value)}
+            maxLength={120}
+            required
+            minLength={2}
+            disabled={busy}
+          />
+        )}
         <Dropdown
           inputId="reserva-recurso"
           label="Ambiente ou equipamento *"

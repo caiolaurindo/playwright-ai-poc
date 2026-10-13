@@ -20,6 +20,9 @@ export interface Reservation {
   resourceId: string;
   collaboratorId: string;
   title: string;
+  organization: "Perpart" | "Seduh";
+  requestType: "Reunião interna" | "Atendimento externo" | "Capacitação";
+  requestDetail: string;
   notes: string;
   participants: number;
   startAt: string;
@@ -31,6 +34,9 @@ export interface Reservation {
 export interface CreateReservation {
   resourceId: string;
   title: string;
+  organization: "Perpart" | "Seduh";
+  requestType: "Reunião interna" | "Atendimento externo" | "Capacitação";
+  requestDetail?: string;
   notes?: string;
   participants: number;
   startAt: string;
