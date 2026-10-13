@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]
+  - alert [ref=e11]
+  - link "Ir para o conteúdo" [ref=e12] [cursor=pointer]:
+    - /url: "#conteudo"
+  - region "Barra com link para o site do Governo de Pernambuco e controladores de acessibilidade." [ref=e13]:
+    - link "Ir para o site do Governo de Pernambuco" [ref=e14] [cursor=pointer]:
+      - /url: https://www.pe.gov.br/
+      - generic [ref=e17]: Governo de Pernambuco
+    - region "Controles de acessibilidade" [ref=e18]
+  - banner [ref=e19]:
+    - generic [ref=e20]:
+      - link "AgendaLab, início" [ref=e21] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e23]: 
+        - generic [ref=e24]:
+          - text: AgendaLab
+          - generic [ref=e25]: Ambientes e equipamentos
+      - generic [ref=e27]:
+        - generic [ref=e28]: —
+        - generic [ref=e29]:
+          - strong [ref=e30]: Colaborador de demonstração
+          - generic [ref=e31]: Carregando perfil…
+    - navigation "Navegação principal" [ref=e32]:
+      - link "Ambientes e equipamentos" [ref=e33] [cursor=pointer]:
+        - /url: /
+        - generic [aria-hidden] [ref=e34]: 
+        - text: Ambientes e equipamentos
+      - link "Minhas reservas" [ref=e35] [cursor=pointer]:
+        - /url: /minhas-reservas
+        - generic [aria-hidden] [ref=e36]: 
+        - text: Minhas reservas
+  - main [ref=e37]:
+    - generic [ref=e38]:
+      - generic [aria-hidden] [ref=e39]: 
+      - generic [ref=e40]: /
+      - text: AgendaLab
+      - generic [ref=e41]: /
+      - strong [ref=e42]: Ambientes e equipamentos
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic [ref=e45]: ESPAÇOS PARA COLABORAR
+        - heading "Seu próximo encontro começa aqui." [level=1] [ref=e46]
+        - paragraph [ref=e47]: Encontre o ambiente ideal e reserve os recursos que sua equipe precisa.
+      - button "Nova reserva" [disabled]:
+        - generic: 
+    - region [ref=e48]:
+      - generic [ref=e49]:
+        - generic [aria-hidden] [ref=e51]: 
+        - generic [ref=e52]:
+          - heading "Quando você precisa?" [level=2] [ref=e53]
+          - paragraph [ref=e54]: Consulte a disponibilidade para o período desejado.
+        - generic [ref=e55]:
+          - generic [aria-hidden] [ref=e56]: 
+          - text: 08h às 18h · Brasília
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]: Data
+          - textbox "Data" [ref=e61]: 2026-10-14
+        - generic [ref=e62]:
+          - generic [ref=e63]: Horário de início
+          - textbox "Horário de início" [ref=e65]: 09:00
+        - generic [ref=e66]:
+          - generic [ref=e67]: Horário de término
+          - textbox "Horário de término" [ref=e69]: 10:00
+        - button "Consultar disponibilidade" [disabled]
+    - region [ref=e70]:
+      - generic [ref=e71]:
+        - generic [ref=e72]:
+          - heading "Ambientes e equipamentos" [level=2] [ref=e73]
+          - paragraph [ref=e74]: Disponibilidade em 14 de out. de 2026, das 09:00 às 10:00.
+        - generic [ref=e75]: Consultando…
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [aria-hidden] [ref=e79]: 
+          - textbox "Buscar ambiente ou equipamento" [ref=e82]:
+            - /placeholder: Buscar por nome, local ou recurso…
+        - generic [ref=e85] [cursor=pointer]:
+          - generic:
+            - textbox "Tipo de recurso": Salas de reunião
+          - generic:
+            - combobox:
+              - option "Salas de reunião" [selected]
+          - generic [ref=e86]: Salas de reunião
+          - button [ref=e87]
+        - generic [ref=e92] [cursor=pointer]:
+          - generic:
+            - textbox "Capacidade mínima da sala": Qualquer capacidade
+          - generic:
+            - combobox:
+              - option "Qualquer capacidade" [selected]
+          - generic [ref=e93]: Qualquer capacidade
+          - button [ref=e94]
+      - group "Filtrar disponibilidade" [ref=e98]:
+        - button "Todos" [pressed] [ref=e99] [cursor=pointer]
+        - button "Disponíveis" [ref=e100] [cursor=pointer]
+      - status "Carregando recursos" [ref=e101]
+    - complementary [ref=e126]:
+      - generic [aria-hidden] [ref=e128]: 
+      - generic [ref=e129]:
+        - strong [ref=e130]: Um espaço para todos, uma reserva por vez.
+        - paragraph [ref=e131]: Não vai utilizar o recurso? Cancele sua reserva para que outra pessoa possa aproveitar.
+      - link "Gerenciar minhas reservas" [ref=e132] [cursor=pointer]:
+        - /url: /minhas-reservas
+        - text: Gerenciar minhas reservas
+        - generic [aria-hidden] [ref=e133]: 
+  - contentinfo [ref=e134]:
+    - generic [ref=e135]:
+      - strong [ref=e136]: AgendaLab
+      - generic [ref=e137]: Uso compartilhado. Trabalho conectado.
+    - generic [ref=e138]: Projeto de estudo · Dados fictícios · Horário de Brasília
