@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Button, Dialog, InputText, Tag } from "@uigovpe/components";
+import {
+  Button,
+  Dialog,
+  Icon,
+  InputText,
+  Tag,
+  Typography,
+} from "@uigovpe/components";
 import type { Reservation } from "@agendalab/contracts";
 import { api } from "@/lib/api";
 import { formatDate, formatTime } from "@/lib/dates";
@@ -125,7 +132,7 @@ export function MyReservations() {
       <section className="page-intro">
         <div>
           <span className="eyebrow">SUA AGENDA, ORGANIZADA</span>
-          <h1>Minhas reservas</h1>
+          <Typography variant="h1">Minhas reservas</Typography>
           <p>
             Acompanhe seus próximos encontros e gerencie os recursos reservados.
           </p>
@@ -264,7 +271,7 @@ export function MyReservations() {
                   </div>
                   <div className="reservation-detail">
                     <div className="reservation-heading">
-                      <h2>{item.title}</h2>
+                      <Typography variant="h2">{item.title}</Typography>
                       <Tag
                         severity={
                           item.status === "cancelled"
@@ -312,7 +319,7 @@ export function MyReservations() {
                         label="Cancelar reserva"
                         severity="danger"
                         outlined
-                        icon="pi pi-times"
+                        icon={<Icon icon="close" outline />}
                         onClick={() => {
                           setSelected(item);
                           setCancelError("");

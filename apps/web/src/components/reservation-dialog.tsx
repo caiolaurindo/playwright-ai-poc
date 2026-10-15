@@ -5,6 +5,7 @@ import {
   Button,
   Dialog,
   Dropdown,
+  Icon,
   InputNumber,
   InputText,
   InputTextarea,
@@ -310,7 +311,7 @@ export function ReservationDialog({
           <Button
             type="submit"
             label="Confirmar reserva"
-            icon="pi pi-check"
+            icon={<Icon icon="check" outline />}
             loading={busy}
             disabled={busy || !resource}
           />

@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Button, Dropdown, InputText, Tag } from "@uigovpe/components";
+import {
+  Button,
+  Dropdown,
+  Icon,
+  InputText,
+  Tag,
+  Typography,
+} from "@uigovpe/components";
 import type { Resource, ResourceType } from "@agendalab/contracts";
 import { api } from "@/lib/api";
 import {
@@ -123,7 +130,9 @@ export function ResourceCatalog() {
       <section className="page-intro">
         <div>
           <span className="eyebrow">ESPAÇOS PARA COLABORAR</span>
-          <h1>Seu próximo encontro começa aqui.</h1>
+          <Typography variant="h1">
+            Seu próximo encontro começa aqui.
+          </Typography>
           <p>
             Encontre o ambiente ideal e reserve os recursos que sua equipe
             precisa.
@@ -131,7 +140,7 @@ export function ResourceCatalog() {
         </div>
         <Button
           label="Nova reserva"
-          icon="pi pi-plus"
+          icon={<Icon icon="add" outline />}
           onClick={() => {
             setSuccess("");
             setDialog({ selected: null });
@@ -147,8 +156,10 @@ export function ResourceCatalog() {
           <span className="panel-icon">
             <i className="pi pi-calendar" aria-hidden="true" />
           </span>
-          <div>
-            <h2 id="availability-heading">Quando você precisa?</h2>
+          <div id="availability-heading">
+            <Typography variant="h2">
+              Quando você precisa?
+            </Typography>
             <p>Consulte a disponibilidade para o período desejado.</p>
           </div>
           <span className="business-hours">
@@ -197,7 +208,7 @@ export function ResourceCatalog() {
           <Button
             type="submit"
             label="Consultar disponibilidade"
-            icon="pi pi-search"
+            icon={<Icon icon="search" outline />}
             loading={loading}
             disabled={loading}
           />
@@ -211,8 +222,10 @@ export function ResourceCatalog() {
       )}
       <section className="catalog-section" aria-labelledby="catalog-heading">
         <div className="catalog-title">
-          <div>
-            <h2 id="catalog-heading">Ambientes e equipamentos</h2>
+          <div id="catalog-heading">
+            <Typography variant="h2">
+              Ambientes e equipamentos
+            </Typography>
             <p>
               Disponibilidade em {formatDate(toTimestamp(period.date, "12:00"))}
               , das {period.start} às {period.end}.
@@ -290,7 +303,7 @@ export function ResourceCatalog() {
             <Button
               label="Tentar novamente"
               outlined
-              icon="pi pi-refresh"
+              icon={<Icon icon="refresh" outline />}
               onClick={() => setRefresh((value) => value + 1)}
             />
           </div>
@@ -348,7 +361,7 @@ export function ResourceCatalog() {
                 </div>
                 <div className="resource-card-body">
                   <div className="resource-heading">
-                    <h3>{resource.name}</h3>
+                    <Typography variant="h3">{resource.name}</Typography>
                     <Tag
                       value={resource.available ? "Disponível" : "Reservado"}
                       severity={resource.available ? "success" : "warning"}
@@ -382,7 +395,7 @@ export function ResourceCatalog() {
                     <Button
                       label="Reservar"
                       outlined
-                      icon="pi pi-arrow-right"
+                      icon={<Icon icon="arrow_forward" outline />}
                       iconPos="right"
                       aria-label={`Reservar ${resource.name}`}
                       disabled={!resource.available}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@uigovpe/components";
+import { Button, Typography } from "@uigovpe/components";
 
 export function Feedback({
   children,
@@ -36,7 +36,7 @@ export function EmptyState({
       <span className="empty-icon">
         <i className="pi pi-calendar" aria-hidden="true" />
       </span>
-      <h2>{title}</h2>
+      <Typography variant="h2">{title}</Typography>
       <p>{description}</p>
       {action && <Button label="Limpar filtros" outlined onClick={action} />}
     </div>
