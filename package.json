@@ -17,6 +17,7 @@
     "db:reset": "npm run db:reset -w @agendalab/api"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.64.0",
     "@types/node": "^22.20.5",
     "concurrently": "^9.2.1",

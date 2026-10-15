@@ -1,40 +1,51 @@
 import { expect, test } from "@playwright/test";
+import { fakerPT_BR as faker } from "@faker-js/faker";
+
+type ReservationCase = {
+  name: string;
+  organization: "Perpart" | "Seduh";
+  requestType: "Reunião interna" | "Atendimento externo" | "Capacitação";
+  hasRequestDetail: boolean;
+  useMaximumCapacity: boolean;
+};
 
 const reservationCases = [
   {
     name: "reunião interna para equipe pequena",
     organization: "Perpart",
     requestType: "Reunião interna",
-    title: "Alinhamento do projeto",
-    participants: "3",
-    start: "09:00",
-    end: "10:00",
+    hasRequestDetail: false,
+    useMaximumCapacity: false,
   },
   {
     name: "atendimento externo com entidade visitante",
     organization: "Seduh",
     requestType: "Atendimento externo",
-    requestDetail: "Secretaria de Administração",
-    title: "Atendimento sobre serviços",
-    participants: "5",
-    start: "14:00",
-    end: "15:30",
+    hasRequestDetail: true,
+    useMaximumCapacity: false,
   },
   {
     name: "capacitação com tema informado",
     organization: "Perpart",
     requestType: "Capacitação",
-    requestDetail: "Acessibilidade digital",
-    title: "Oficina de acessibilidade",
-    participants: "8",
-    start: "16:00",
-    end: "17:00",
+    hasRequestDetail: true,
+    useMaximumCapacity: true,
   },
-] as const;
+] satisfies readonly ReservationCase[];
 
 test.describe("Nova reserva: variações válidas", () => {
   for (const reservationCase of reservationCases) {
     test(`confirma ${reservationCase.name}`, async ({ page }) => {
+      const date = faker.date.future({ years: 1 }).toISOString().slice(0, 10);
+      const startHour = faker.number.int({ min: 8, max: 16 });
+      const period = {
+        date,
+        start: `${String(startHour).padStart(2, "0")}:00`,
+        end: `${String(startHour + 1).padStart(2, "0")}:00`,
+      };
+      let resourceName = "";
+      let resourceCapacity = 1;
+
       await page.route("**/reservations", async (route) => {
         if (route.request().method() !== "POST") {
           await route.continue();
@@ -46,18 +57,18 @@ test.describe("Nova reserva: variações válidas", () => {
           status: 201,
           contentType: "application/json",
           body: JSON.stringify({
-            id: `test-${Date.now()}`,
+            id: faker.string.uuid(),
             ...payload,
             collaboratorId: "colaborador-demo",
             status: "confirmed",
             createdAt: new Date().toISOString(),
             resource: {
-              id: "sala-capibaribe",
-              name: "Sala Capibaribe",
+              id: payload.resourceId,
+              name: resourceName,
               type: "room",
-              location: "Edifício Sede · 1º andar",
-              description: "Sala de reunião",
-              capacity: 8,
+              location: "",
+              description: "",
+              capacity: resourceCapacity,
               features: [],
               available: true,
             },
@@ -69,6 +80,21 @@ test.describe("Nova reserva: variações válidas", () => {
       await page.getByRole("button", { name: "Nova reserva" }).click();
 
       const form = page.getByRole("dialog", { name: "Nova reserva" });
+      resourceName = await form.locator("#reserva-recurso").inputValue();
+      resourceCapacity = Number(
+        await form.locator("#reserva-participantes").getAttribute("max"),
+      );
+      const reservationData = {
+        ...period,
+        title: `Reserva de teste ${faker.string.uuid()}`,
+        participants: String(
+          reservationCase.useMaximumCapacity
+            ? resourceCapacity
+            : faker.number.int({ min: 1, max: resourceCapacity }),
+        ),
+        requestDetail: faker.company.name(),
+      };
+
       const requestType = form.locator("#reserva-tipo-solicitacao");
       if (reservationCase.requestType !== "Reunião interna") {
         await form.locator(".p-dropdown").nth(1).click();
@@ -82,20 +108,20 @@ test.describe("Nova reserva: variações válidas", () => {
         await form.getByRole("option", { name: "Seduh" }).click();
       }
 
-      if (reservationCase.requestDetail) {
+      if (reservationCase.hasRequestDetail) {
         await form.locator("#reserva-detalhe-solicitacao").fill(
-          reservationCase.requestDetail,
+          reservationData.requestDetail,
         );
       }
 
-      const date = await form.locator("#reserva-data").inputValue();
       const reservation = {
         ...reservationCase,
-        date,
-        resource: "Sala Capibaribe",
+        ...reservationData,
+        resource: resourceName,
       };
 
       await form.locator("#reserva-titulo").fill(reservation.title);
+      await form.locator("#reserva-data").fill(reservation.date);
       await form.locator("#reserva-inicio").fill(reservation.start);
       await form.locator("#reserva-fim").fill(reservation.end);
       await form.locator("#reserva-participantes").fill(reservation.participants);
@@ -120,9 +146,9 @@ test.describe("Nova reserva: variações válidas", () => {
         form.locator("#reserva-participantes"),
       ).toHaveValue(reservation.participants);
 
-      if (reservationCase.requestDetail) {
+      if (reservationCase.hasRequestDetail) {
         await expect(form.locator("#reserva-detalhe-solicitacao")).toHaveValue(
-          reservationCase.requestDetail,
+          reservationData.requestDetail,
         );
       }
 
@@ -139,11 +165,14 @@ test.describe("Nova reserva: variações válidas", () => {
 test("impede confirmar uma reserva quando o término antecede o início", async ({
   page,
 }) => {
+  const title = `Reserva de teste ${faker.string.uuid()}`;
+  const date = faker.date.future({ years: 1 }).toISOString().slice(0, 10);
   await page.goto("http://localhost:3000/");
   await page.getByRole("button", { name: "Nova reserva" }).click();
 
   const form = page.getByRole("dialog", { name: "Nova reserva" });
-  await form.locator("#reserva-titulo").fill("Período inválido");
+  await form.locator("#reserva-titulo").fill(title);
+  await form.locator("#reserva-data").fill(date);
   await form.locator("#reserva-inicio").fill("11:00");
   await form.locator("#reserva-fim").fill("10:00");
   await form.getByRole("button", { name: "Confirmar reserva" }).click();
@@ -155,6 +184,7 @@ test("impede confirmar uma reserva quando o término antecede o início", async 
 test("exige o órgão visitante em solicitações de atendimento externo", async ({
   page,
 }) => {
+  const title = `Reserva de teste ${faker.string.uuid()}`;
   await page.goto("http://localhost:3000/");
   await page.getByRole("button", { name: "Nova reserva" }).click();
 
@@ -162,7 +192,7 @@ test("exige o órgão visitante em solicitações de atendimento externo", async
   const requestType = form.locator("#reserva-tipo-solicitacao");
   await form.locator(".p-dropdown").nth(1).click();
   await form.getByRole("option", { name: "Atendimento externo" }).click();
-  await form.locator("#reserva-titulo").fill("Atendimento sem visitante");
+  await form.locator("#reserva-titulo").fill(title);
 
   const detail = form.locator("#reserva-detalhe-solicitacao");
   await expect(detail).toHaveAttribute("required", "");
