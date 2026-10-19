@@ -14,13 +14,17 @@
     "build": "npm run build -w @agendalab/api && npm run build -w @agendalab/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "start": "concurrently --kill-others -n API,WEB -c cyan,blue \"npm run start -w @agendalab/api\" \"npm run start -w @agendalab/web\"",
-    "db:reset": "npm run db:reset -w @agendalab/api"
+    "db:reset": "npm run db:reset -w @agendalab/api",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.64.0",
     "@types/node": "^22.20.5",
     "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
     "typescript": "^5.9.3"
   }
 }
