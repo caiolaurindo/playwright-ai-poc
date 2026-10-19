@@ -1,17 +1,77 @@
+# Dependencies
 node_modules/
-.next/
-dist/
 .npm-cache/
-.local-check/
-.env
-.env.local
-*.tsbuildinfo
-apps/api/data/
-*.log
 
-# Playwright
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-/playwright/.auth/
+# Production and Build Outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+
+# TypeScript
+*.tsbuildinfo
+
+# Internal / verification scripts
+.local-check/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+!.env*.example
+
+# Database files
+apps/api/data/
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Playwright & Testing
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+.playwright/
+.playwright-mcp/
+coverage/
+.nyc_output/
+
+# IDEs and Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+*.sublime-project
+*.sublime-workspace
+*.sw?
+*~
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Deployments
+.vercel/
