@@ -1,36 +1,43 @@
 # AgendaLab: laboratório de testes automatizados com Playwright
 
-Este repositório é um laboratório prático para aprender **testes automatizados com Playwright**. A aplicação usada nos estudos é o **AgendaLab**, um sistema de reserva de ambientes e equipamentos compartilhados: salas de reunião, projetores e notebooks.
+Este repositório é um laboratório prático para aprender e aplicar **testes automatizados com Playwright**. A aplicação utilizada nos estudos é o **AgendaLab**, um sistema de reserva de ambientes e equipamentos compartilhados: salas de reunião, projetores e notebooks.
 
-A proposta é construir o aprendizado por etapas: conhecer os fluxos da aplicação, escrever os primeiros testes e evoluir a organização da suíte. Os cenários se aproximam de sistemas administrativos do setor público, para facilitar a aplicação dos conceitos no trabalho.
+A proposta é construir o aprendizado por etapas: conhecer os fluxos da aplicação, escrever testes E2E robustos, utilizar agentes de IA guiados por skills especializadas e seguir um fluxo consistente de validação e qualidade antes de cada commit. Os cenários se aproximam de sistemas administrativos do setor público, facilitando a aplicação dos conceitos no dia a dia.
 
 A aplicação utiliza **Next.js no frontend, NestJS na API e SQLite para persistência**, com a identidade visual do UI Kit do Governo de Pernambuco. Todos os dados são fictícios e o projeto não tem vínculo institucional.
 
-**Ideia para o trabalho:** demonstrar como os fluxos importantes de um sistema podem ser descritos em linguagem simples, automatizados no navegador e executados de forma repetível. O AgendaLab serve como prova de conceito para discutir cobertura, manutenção e integração dos testes ao desenvolvimento.
+**Ideia para o trabalho:** demonstrar como os fluxos importantes de um sistema podem ser descritos em linguagem simples, automatizados no navegador e executados de forma repetível. O AgendaLab serve como prova de conceito para discutir cobertura, manutenção, isolamento de dados e integração dos testes ao desenvolvimento.
 
-**Estado atual:** a aplicação, o Swagger, os testes E2E iniciais e uma configuração de Playwright MCP estão implementados. O laboratório mostra duas maneiras de começar um teste com apoio do navegador: gravar ações com o Codegen ou explorar a aplicação com o MCP. Em ambos os casos, o código precisa ser revisado e receber asserções úteis.
+**Estado atual:** a aplicação, a documentação Swagger da API, a suíte de testes E2E com Playwright, o hook de `pre-commit` com Husky, o servidor Playwright MCP e a skill de IA `novo-teste-playwright` estão totalmente configurados. O laboratório apoia a criação de testes tanto por gravação com o Playwright Codegen quanto por exploração assistida via MCP ou refinamento via agentes de IA.
 
 ---
 
 ## Sumário
 
-1. [Objetivo e proposta](#1-objetivo-e-proposta)
+1. [Objetivo e arquitetura](#1-objetivo-e-arquitetura)
 2. [Como rodar a aplicação](#2-como-rodar-a-aplicação)
-3. [Conheça os fluxos do AgendaLab](#3-conheça-os-fluxos-do-agendalab)
-4. [Fundamentos do Playwright](#4-fundamentos-do-playwright)
-5. [Tutorial: criar um teste com Codegen](#5-tutorial-criar-um-teste-com-codegen)
-6. [Tutorial: explorar a aplicação com MCP](#6-tutorial-explorar-a-aplicação-com-mcp)
-7. [MCP ou Codegen: quando usar cada um](#7-mcp-ou-codegen-quando-usar-cada-um)
-8. [Executar e investigar os testes](#8-executar-e-investigar-os-testes)
-9. [Testes E2E existentes](#9-testes-e2e-existentes)
-10. [Como aplicar a ideia no trabalho](#10-como-aplicar-a-ideia-no-trabalho)
-11. [Referências](#11-referências)
+3. [Estrutura do repositório](#3-estrutura-do-repositório)
+4. [Conheça os fluxos do AgendaLab](#4-conheça-os-fluxos-do-agendalab)
+5. [Fundamentos do Playwright](#5-fundamentos-do-playwright)
+6. [Skill de IA: `novo-teste-playwright`](#6-skill-de-ia-novo-teste-playwright)
+7. [Fluxo recomendado para criação de testes E2E](#7-fluxo-recomendado-para-criação-de-testes-e2e)
+8. [Tutorial: criar um teste com Codegen](#8-tutorial-criar-um-teste-com-codegen)
+9. [Tutorial: explorar a aplicação com MCP](#9-tutorial-explorar-a-aplicação-com-mcp)
+10. [Codegen, MCP ou Skill de IA: quando usar cada um](#10-codegen-mcp-ou-skill-de-ia-quando-usar-cada-um)
+11. [Executar e investigar os testes](#11-executar-e-investigar-os-testes)
+12. [Testes E2E existentes](#12-testes-e2e-existentes)
+13. [Dados variáveis com Faker](#13-dados-variáveis-com-faker)
+14. [Validação e processo de commit (Husky)](#14-validação-e-processo-de-commit-husky)
+15. [Referência rápida](#15-referência-rápida)
+16. [Links para documentação interna](#16-links-para-documentação-interna)
+17. [Como aplicar a ideia no trabalho](#17-como-aplicar-a-ideia-no-trabalho)
+18. [Referências](#18-referências)
 
 ---
 
-## 1. Objetivo e proposta
+## 1. Objetivo e arquitetura
 
-Aprender a verificar o comportamento de uma aplicação real usando seus fluxos de negócio. O ponto de partida são quatro funcionalidades:
+Aprender a verificar o comportamento de uma aplicação real usando seus fluxos de negócio. O ponto de partida são quatro funcionalidades centrais:
 
 | Funcionalidade | Comportamento esperado |
 | --- | --- |
@@ -39,200 +46,350 @@ Aprender a verificar o comportamento de uma aplicação real usando seus fluxos 
 | Consultar minhas reservas | Encontrar a reserva criada e acompanhar sua situação |
 | Cancelar uma reserva | Confirmar o cancelamento e liberar o período para outra reserva |
 
-O estudo inclui fluxos bem-sucedidos e situações como campos inválidos, conflitos de horário e listas sem resultados. A ideia é praticar automação com ferramentas conhecidas e discutir como adaptar os mesmos princípios a sistemas maiores.
+O estudo inclui fluxos bem-sucedidos e situações como campos inválidos, conflitos de horário e listas sem resultados. A ideia é praticar automação com ferramentas modernas e discutir como adaptar os mesmos princípios a sistemas corporativos maiores.
 
 ### Arquitetura do laboratório
 
 | Parte | Tecnologia | Responsabilidade |
 | --- | --- | --- |
-| Interface | Next.js | Catálogo, formulário e gerenciamento de reservas |
-| API | NestJS | Disponibilidade, criação e cancelamento de reservas |
+| Interface web | Next.js 16 + React 19 | Catálogo, formulário e gerenciamento de reservas com UI GovPE |
+| API | NestJS 12 | Disponibilidade, criação e cancelamento de reservas com validação |
 | Persistência | SQLite | Dados demonstrativos locais |
-| Automação | Playwright Test | Testes de ponta a ponta no navegador |
-| Exploração assistida | Playwright MCP | Inspecionar e interagir com a interface a partir de um cliente MCP |
+| Automação E2E | Playwright Test | Testes de ponta a ponta no navegador (Chromium, Firefox, WebKit) |
+| Dados dinâmicos | @faker-js/faker | Geração de dados de teste localizados em português brasileiro |
+| Garantia de qualidade | Husky | Hook de Git (`pre-commit`) para execução da suíte de testes |
+| Assistência de IA | Skill `novo-teste-playwright` | Transformação de gravações brutas em testes robustos |
+| Exploração assistida | Playwright MCP | Inspecionar e interagir com a interface via protocolo MCP |
 
 ---
 
 ## 2. Como rodar a aplicação
 
-**Pré-requisito:** Node.js 22.13 ou superior. Os comandos abaixo devem ser executados na raiz do repositório.
+### Pré-requisitos
 
-Instale as dependências e inicie a aplicação:
+- **Node.js:** versão `22.13.0` ou superior (conforme declarado em `package.json`).
+- **Navegadores do Playwright:** instalados via CLI do Playwright.
 
-```powershell
-npm install
-npm run dev
-```
+### Instalação das dependências
 
-O Playwright Test e o Faker já estão declarados como dependências de desenvolvimento. Se você estiver adicionando o Faker a outro projeto Playwright, instale-o com:
-
-```powershell
-npm install --save-dev @faker-js/faker
-```
-
-Abra [http://localhost:3000](http://localhost:3000). O comando de desenvolvimento inicia os dois aplicativos:
-
-| Aplicativo | Endereço |
-| --- | --- |
-| Frontend Next.js | [http://localhost:3000](http://localhost:3000) |
-| API NestJS | [http://localhost:3001/api/health](http://localhost:3001/api/health) |
-| Swagger da API | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) |
-
-O banco SQLite é criado automaticamente na primeira inicialização, com seis salas, um projetor e dois notebooks. Não é necessário instalar outro servidor de banco de dados ou configurar um login. Use `Ctrl+C` para encerrar os processos.
-
-Para apagar todas as reservas do banco local sem parar a API, execute `npm run db:reset`. Os recursos cadastrados são mantidos.
-
-Também é possível iniciar os aplicativos separadamente, em dois terminais:
-
-```powershell
-# Terminal 1: API
-npm run dev -w @agendalab/api
-```
-
-```powershell
-# Terminal 2: frontend
-npm run dev -w @agendalab/web
-```
-
----
-
-## 3. Conheça os fluxos do AgendaLab
-
-Antes de automatizar, percorra o fluxo manualmente:
-
-1. Abra o catálogo. A consulta inicial considera amanhã, das 09h às 10h, e exibe salas de reunião.
-2. Altere a data ou os horários e clique em **Consultar disponibilidade**. A alteração só é aplicada à consulta depois desse clique.
-3. Busque uma sala pelo nome, filtre pela capacidade ou selecione projetores e notebooks no filtro de tipo.
-4. Clique em **Reservar** em um recurso disponível. Preencha o formulário e confirme a reserva.
-5. Abra **Minhas reservas** e localize a reserva pelo título ou pelo nome do recurso.
-6. Se desejar, cancele a reserva e confirme o cancelamento.
-7. Volte ao catálogo e consulte o mesmo período. O recurso deve estar disponível novamente se não houver outra reserva confirmada nesse intervalo.
-
-O colaborador é **Ana Silva**, uma identidade fixa de demonstração. As reservas criadas pelo fluxo real permanecem salvas quando a aplicação é reiniciada. Por isso, considere os dados antes de repetir testes que enviam uma reserva.
-
----
-
-## 4. Fundamentos do Playwright
-
-O **Playwright Test** é um framework de testes de ponta a ponta para aplicações web. Ele automatiza ações no navegador e verifica os resultados, com suporte a Chromium, Firefox e WebKit. Consulte a [introdução oficial](https://playwright.dev/docs/intro).
-
-Um teste de interface normalmente combina **navegação, localização de elementos, ações e asserções**. O exemplo abaixo abre a documentação do Playwright, clica em um link e verifica o resultado:
-
-```typescript
-import { expect, test } from "@playwright/test";
-
-test("o link Get started leva à instalação", async ({ page }) => {
-  await page.goto("https://playwright.dev/");
-
-  await page.getByRole("link", { name: "Get started" }).click();
-
-  await expect(
-    page.getByRole("heading", { name: "Installation" }),
-  ).toBeVisible();
-});
-```
-
-O que acontece:
-
-1. `test` declara um caso de teste com um nome que aparece no relatório.
-2. `page.goto()` navega para o endereço informado.
-3. `getByRole()` localiza o link pelo papel e pelo nome acessível.
-4. `.click()` executa a ação.
-5. `expect(...).toBeVisible()` confirma um resultado observável na página.
-
-Os conceitos principais para desenvolver a suíte são:
-
-- **Localizadores:** encontrar controles pelo papel e nome apresentados ao usuário.
-- **Ações:** clicar, preencher, marcar opções e navegar.
-- **Asserções:** verificar se o comportamento esperado ocorreu.
-- **Isolamento:** preparar os dados para um teste não depender de outro.
-- **Diagnóstico:** investigar traces e relatórios quando há falha.
-
-Prefira localizadores por papel, label ou test ID estável. Evite depender da posição de um elemento ou de detalhes internos da implementação quando há uma alternativa acessível. Veja as [boas práticas do Playwright](https://playwright.dev/docs/best-practices), a [documentação de Locators](https://playwright.dev/docs/locators) e a [documentação de asserções](https://playwright.dev/docs/test-assertions).
-
-### Ações e asserções comuns
-
-| Código | O que faz |
-| --- | --- |
-| `locator.click()` | Clica no elemento |
-| `locator.fill("texto")` | Preenche um campo |
-| `locator.check()` / `locator.uncheck()` | Marca ou desmarca uma caixa |
-| `locator.press("Enter")` | Pressiona uma tecla |
-| `locator.selectOption("valor")` | Escolhe uma opção em um `<select>` HTML |
-| `expect(locator).toBeVisible()` | Verifica que o elemento está visível |
-| `expect(locator).toHaveText("texto")` | Verifica o texto exibido |
-| `expect(locator).toHaveValue("valor")` | Verifica o valor de um campo |
-| `expect(page).toHaveURL("url")` | Verifica o endereço atual |
-
-Asserções de interface normalmente são assíncronas e devem usar `await`. Elas aguardam a condição até que seja satisfeita ou até atingir o timeout configurado.
-
----
-
-## 5. Tutorial: criar um teste com Codegen
-
-O **Codegen** abre o navegador e o Playwright Inspector enquanto você percorre a aplicação. As ações são transformadas em código Playwright. É um bom ponto de partida para aprender localizadores e capturar um fluxo conhecido.
-
-### 5.1. Preparar o projeto
-
-Se ainda não instalou as dependências e os navegadores, execute na raiz do repositório:
+Na raiz do repositório, execute:
 
 ```powershell
 npm install
 npx playwright install
 ```
 
-Em um terminal, inicie a aplicação e mantenha o processo aberto:
+O comando `npm install` também configura automaticamente os hooks do Git via Husky (script `prepare`).
+
+### Configuração de variáveis de ambiente
+
+A aplicação já possui valores padrão funcionais para desenvolvimento local, não exigindo arquivos `.env` adicionais para execução padrão. Caso precise personalizar portas ou o caminho do banco, utilize os arquivos de exemplo:
+
+- **API (`apps/api`):** consulte [apps/api/.env.example](apps/api/.env.example). Variáveis suportadas: `PORT=3001` e `DATABASE_PATH=./data/agendalab.sqlite`.
+- **Frontend (`apps/web`):** consulte [apps/web/.env.example](apps/web/.env.example). Variável suportada: `API_URL=http://127.0.0.1:3001`.
+
+### Iniciar a aplicação localmente
+
+Para iniciar simultaneamente o backend e o frontend com recarregamento automático:
 
 ```powershell
 npm run dev
 ```
 
-### 5.2. Gravar uma reserva na Sala Frevo
+Esse comando utiliza `concurrently` para orquestrar os dois workspaces e disponibiliza:
 
-Em outro terminal, na raiz do repositório, inicie o Codegen:
+| Aplicativo | Endereço | Descrição |
+| --- | --- | --- |
+| Frontend Next.js | [http://localhost:3000](http://localhost:3000) | Catálogo e formulários do AgendaLab |
+| API NestJS | [http://localhost:3001/api/health](http://localhost:3001/api/health) | Endpoint de verificação de integridade |
+| Swagger da API | [http://localhost:3001/api/docs](http://localhost:3001/api/docs) | Documentação interativa dos endpoints OpenAPI |
+
+O banco SQLite é criado automaticamente na primeira inicialização da API em `apps/api/data/agendalab.sqlite`, populado com seis salas, um projetor e dois notebooks. Não é necessário instalar servidores de banco externos ou configurar credenciais.
+
+Para apagar todas as reservas do banco local sem reiniciar a API, execute:
+
+```powershell
+npm run db:reset
+```
+
+> **Atenção:** `npm run db:reset` executa a limpeza dos registros da tabela de reservas, preservando o catálogo de salas e equipamentos cadastrados.
+
+Também é possível iniciar os serviços separadamente em terminais distintos:
+
+```powershell
+# Terminal 1: API NestJS
+npm run dev -w @agendalab/api
+```
+
+```powershell
+# Terminal 2: Frontend Next.js
+npm run dev -w @agendalab/web
+```
+
+---
+
+## 3. Estrutura do repositório
+
+O repositório é organizado no formato monorepo utilizando npm workspaces:
+
+```text
+agendalab/
+├── .agent/
+│   └── skills/
+│       └── novo-teste-playwright/
+│           └── SKILL.md             # Instruções da skill para agentes de IA
+├── .husky/
+│   └── pre-commit                   # Hook do Git que executa os testes antes do commit
+├── apps/
+│   ├── api/                         # Backend NestJS (porta 3001) com SQLite
+│   │   ├── .env.example             # Exemplo de configuração da API
+│   │   ├── data/                    # Banco SQLite local (agendalab.sqlite)
+│   │   └── scripts/reset-db.mjs     # Script para resetar reservas locais
+│   └── web/                         # Frontend Next.js (porta 3000) com UI GovPE
+│       ├── .env.example             # Exemplo de configuração do frontend
+│       └── .mcp.json                # Configuração do Playwright MCP
+├── docs/
+│   └── skills/
+│       └── outros-agentes.md        # Guia para configurar a skill no Claude Code e outros agentes
+├── e2e/                             # Suíte oficial de testes ponta a ponta Playwright
+│   └── new-reservation-variants.spec.ts
+├── packages/
+│   └── contracts/                   # Tipos e contratos TypeScript compartilhados
+├── package.json                     # Scripts e dependências raiz
+└── playwright.config.ts             # Configuração geral do Playwright Test
+```
+
+---
+
+## 4. Conheça os fluxos do AgendaLab
+
+Antes de automatizar, recomenda-se percorrer o fluxo manualmente pela interface:
+
+1. Abra o catálogo em [http://localhost:3000](http://localhost:3000). A consulta inicial considera amanhã, das 09h às 10h, e exibe salas de reunião.
+2. Altere a data ou os horários e clique em **Consultar disponibilidade**. A alteração só é aplicada à consulta após esse clique.
+3. Busque uma sala pelo nome, filtre pela capacidade ou selecione projetores e notebooks no filtro de tipo.
+4. Clique em **Reservar** em um recurso disponível. Preencha o formulário e confirme a reserva.
+5. Abra **Minhas reservas** e localize a reserva pelo título ou pelo nome do recurso.
+6. Se desejar, cancele a reserva e confirme o cancelamento.
+7. Volte ao catálogo e consulte o mesmo período: o recurso deve constar como disponível novamente se não houver outra reserva confirmada nesse intervalo.
+
+O colaborador autenticado na demonstração é **Ana Silva**, uma identidade estática para fins de estudo. As reservas criadas através do fluxo com a API real persistem no banco SQLite local.
+
+---
+
+## 5. Fundamentos do Playwright
+
+O **Playwright Test** é um framework para automação de testes de ponta a ponta em navegadores modernos (Chromium, Firefox e WebKit).
+
+Um teste de interface combina **navegação, localização de elementos, ações do usuário e asserções**. Exemplo conceitual:
+
+```typescript
+import { expect, test } from "@playwright/test";
+
+test("navega para nova reserva e verifica o modal", async ({ page }) => {
+  await page.goto("http://localhost:3000/");
+  await page.getByRole("button", { name: "Nova reserva" }).click();
+
+  await expect(
+    page.getByRole("dialog", { name: "Nova reserva" }),
+  ).toBeVisible();
+});
+```
+
+### Ações e asserções comuns
+
+| Código | Finalidade |
+| --- | --- |
+| `locator.click()` | Executa o clique em um elemento |
+| `locator.fill("texto")` | Preenche um campo de entrada |
+| `locator.check()` / `locator.uncheck()` | Marca ou desmarca caixa de seleção |
+| `locator.press("Enter")` | Dispara o evento de pressionar uma tecla |
+| `locator.selectOption("valor")` | Seleciona opção em elemento `<select>` nativo |
+| `expect(locator).toBeVisible()` | Verifica se o elemento está visível no DOM |
+| `expect(locator).toBeHidden()` | Verifica se o elemento foi ocultado ou removido |
+| `expect(locator).toHaveText("texto")` | Verifica o conteúdo textual |
+| `expect(locator).toHaveValue("valor")` | Verifica o valor atual de um campo de formulário |
+| `expect(locator).toHaveAttribute("attr", "val")` | Verifica atributos do elemento (ex.: `required`) |
+| `expect(page).toHaveURL("url")` | Verifica a URL corrente |
+
+Asserções web no Playwright são assíncronas e devem usar `await`. Elas realizam tentativas sucessivas automáticas (*web-first assertions*) até que a condição seja atendida ou o timeout expire.
+
+---
+
+## 6. Skill de IA: `novo-teste-playwright`
+
+O projeto conta com uma skill customizada para agentes de inteligência artificial: a **`novo-teste-playwright`**.
+
+### Objetivo da skill
+
+A skill foi concebida para receber gravações geradas pelo Playwright Codegen e transformá-las em especificações de teste E2E completas, legíveis, robustas e alinhadas aos padrões de código e regras de negócio do AgendaLab. Em vez de simplesmente reproduzir ações de clique, ela orienta o agente a:
+
+- Analisar a estrutura do projeto antes de propor código.
+- Identificar a real regra de negócio e os pontos de verificação essenciais.
+- Aplicar localizadores resilientes (`getByRole`, `getByLabel`, `getByText`, seletores estáveis `#reserva-*`).
+- Inserir asserções explícitas e automáticas com `expect`.
+- Integrar dados dinâmicos com `@faker-js/faker` utilizando o locale brasileiro (`fakerPT_BR`).
+- Cobrir cenários positivos, negativos e validações condicionais.
+- Adotar estratégias adequadas de isolamento (mock com `page.route` vs. persistência no SQLite).
+- Validar a execução dos testes antes de entregá-los ao desenvolvedor.
+- Não mascarar erros e **nunca** realizar commits automáticos.
+
+### Localização no repositório
+
+- **Repositório oficial / Antigravity:** [.agent/skills/novo-teste-playwright/SKILL.md](.agent/skills/novo-teste-playwright/SKILL.md)
+
+### Como utilizar no Antigravity
+
+No Antigravity, caso a skill esteja carregada no ambiente de trabalho:
+1. Digite `/novo-teste-playwright` no chat para invocar a skill diretamente.
+2. Forneça o código gravado pelo Codegen (ou indique o caminho do arquivo temporário onde a gravação foi salva).
+3. Informe o objetivo do teste caso a regra de negócio possua detalhes particulares.
+
+> **Importante:** A disponibilidade do comando de barra `/novo-teste-playwright` depende do reconhecimento da pasta `.agent/skills/` pela versão do assistente. Caso o comando de barra não apareça imediatamente na listagem, você pode referenciar o arquivo diretamente no prompt (ex.: *"Siga as diretrizes de [.agent/skills/novo-teste-playwright/SKILL.md](.agent/skills/novo-teste-playwright/SKILL.md) para converter esta gravação em teste"*).
+
+### Como configurar no Claude Code e outros agentes
+
+Cada agente de IA possui suas próprias regras de descoberta e diretórios de skills. O Claude Code, por exemplo, reconhece skills alocadas no diretório `.claude/skills/`.
+
+Para disponibilizar e sincronizar a skill com o Claude Code ou outros assistentes:
+- Consulte o guia completo e passo a passo em [docs/skills/outros-agentes.md](docs/skills/outros-agentes.md).
+- O guia explica como espelhar o arquivo `SKILL.md` em `.claude/skills/novo-teste-playwright/SKILL.md` mantendo o cabeçalho YAML obrigatório e garantindo que ambos os assistentes sigam exatamente as mesmas instruções.
+
+---
+
+## 7. Fluxo recomendado para criação de testes E2E
+
+Para garantir a qualidade, padronização e manutenibilidade da suíte, adote o seguinte fluxo de 8 etapas ao criar novos testes:
+
+### Etapa 1 — Gravar o fluxo
+
+1. Inicie a aplicação no ambiente local: `npm run dev`.
+2. Em outro terminal, abra o gravador do Playwright:
+   ```powershell
+   npx playwright codegen http://localhost:3000
+   ```
+3. Navegue pela funcionalidade e execute as ações que representam o cenário desejado.
+4. Copie o código gerado no Playwright Inspector ou salve-o em um arquivo temporário de rascunho.
+
+> **Lembre-se:** A gravação registra apenas cliques e digitações do usuário. Ela **não** é um teste pronto, pois não contém asserções suficientes de negócio nem trata isolamento ou dados dinâmicos.
+
+### Etapa 2 — Solicitar a criação do teste
+
+1. Abra o agente de IA configurado (Antigravity, Claude Code, etc.).
+2. Invoque a skill `novo-teste-playwright` (ou aponte para o seu arquivo de instruções).
+3. Cole o código TypeScript gerado pelo Codegen ou informe o caminho do arquivo de rascunho.
+4. Esclareça o objetivo do teste e regras de negócio específicas que devem ser cobertas.
+5. Peça ao agente que analise os testes já existentes em `e2e/` antes de gerar novos arquivos, garantindo reuso de convenções e evitando duplicidades.
+
+### Etapa 3 — Transformar a gravação em um teste robusto
+
+O teste final gerado deve:
+- Utilizar `test` e `expect` importados de `@playwright/test`.
+- Conter títulos claros e descritivos do comportamento verificado.
+- Utilizar seletores acessíveis (`getByRole`, `getByLabel`, `getByText`) e IDs semânticos (`#reserva-*`).
+- Conter asserções explícitas para resultados visuais (ex.: mensagens com `role="status"` para sucesso ou `role="alert"` para erros de validação).
+- Cobrir cenários positivos (caminho feliz) e negativos pertinentes (validações de formulário, campos obrigatórios, bloqueios de horário).
+- Evitar pausas estáticas arbitrárias (`waitForTimeout`) e seletores instáveis baseados em classes CSS transitórias.
+
+### Etapa 4 — Utilizar Faker corretamente
+
+O pacote `@faker-js/faker` já está incluído nas dependências de desenvolvimento do projeto.
+
+Sempre que o teste necessitar de dados dinâmicos para prevenir conflitos de valores repetidos, importe o locale brasileiro conforme a convenção:
+
+```typescript
+import { fakerPT_BR as faker } from "@faker-js/faker";
+```
+
+Diretrizes de uso:
+- **Dados únicos:** gere UUIDs (`faker.string.uuid()`) para compor títulos de reserva e evitar conflitos.
+- **Datas e horários:** utilize `faker.date.future()` para agendamentos válidos e gere horários consistentes dentro da faixa permitida.
+- **Consistência:** armazene os valores gerados em constantes no teste para reutilizá-los tanto no preenchimento quanto nas asserções de validação.
+- **Regras fixas:** mantenha valores constantes quando eles definirem a regra de negócio (ex.: opções fixas do dropdown como `"Reunião interna"`, organizações `"Seduh"` ou `"Perpart"`, e valores intencionalmente inválidos em testes de validação).
+- Não force o uso de Faker em testes que apenas validam estados visuais estáticos ou elementos pré-existentes.
+
+### Etapa 5 — Garantir isolamento e segurança
+
+Existem duas abordagens de teste no AgendaLab:
+
+1. **Testes com simulação de API (`page.route`):**
+   - Interceptam chamadas HTTP (como `POST **/reservations`) e retornam respostas simuladas (status 201 com payload mockado ou status 409 com mensagem de conflito).
+   - Não tocam no banco de dados SQLite, executam rapidamente e são ideais para validar variações de interface e mensagens de erro sem gerar resíduos locais.
+2. **Testes de integração com a API real:**
+   - Enviam dados reais que são gravados no SQLite (`apps/api/data/agendalab.sqlite`).
+   - Devem usar títulos únicos e períodos dinâmicos para não colidir com dados existentes.
+   - Não devem depender da ordem de execução de outros testes.
+
+Boas práticas essenciais:
+- Nunca utilize credenciais ou dados pessoais reais.
+- Não realize operações destrutivas sem autorização explícita.
+- Utilize `npm run db:reset` conscientemente para redefinir o banco local de testes quando necessário.
+
+### Etapa 6 — Salvar o teste no local correto
+
+- Conforme definido no arquivo [playwright.config.ts](playwright.config.ts) (`testDir: "./e2e"`), todos os testes oficiais devem ser salvos na pasta [e2e/](e2e/).
+- Nomeie os arquivos com a extensão `.spec.ts` e nomes semânticos (ex.: `e2e/cancelamento-reserva.spec.ts`).
+- Gravações brutas ou anotações devem ficar fora da suíte oficial ou em diretórios temporários descartáveis.
+
+### Etapa 7 — Executar e validar
+
+Antes de aprovar o teste, execute-o localmente:
+- Apenas o teste criado: `npx playwright test e2e/seu-teste.spec.ts`
+- Com navegador visível ou Chromium específico: `npx playwright test e2e/seu-teste.spec.ts --project=chromium`
+- Modo interativo com time-travel: `npm run test:ui`
+
+Caso ocorram falhas, investigue os logs, traces e capturas de tela. Ajuste a implementação com base em evidências reais; **nunca enfraqueça ou remova asserções** apenas para forçar o teste a passar.
+
+### Etapa 8 — Revisar e realizar o commit
+
+1. Revise as alterações com `git diff` ou no editor.
+2. Verifique se o código segue a formatação e convenções do repositório.
+3. Ao executar `git commit`, o hook de `pre-commit` do Husky será disparado automaticamente rodando a suíte de testes E2E.
+4. Como os testes acessam `http://localhost:3000`, certifique-se de que a aplicação esteja rodando (`npm run dev`) antes de efetuar o commit.
+5. O commit deve ser feito manualmente pelo desenvolvedor quando tudo estiver validado. A skill de IA não realiza commits automaticamente.
+
+---
+
+## 8. Tutorial: criar um teste com Codegen
+
+O **Codegen** abre o navegador e o Playwright Inspector enquanto você interage com a tela, gerando o rascunho dos comandos.
+
+### 8.1. Preparar o ambiente
+
+Certifique-se de que a aplicação esteja rodando na raiz:
+
+```powershell
+npm run dev
+```
+
+### 8.2. Gravar uma reserva na Sala Frevo
+
+Em outro terminal na raiz do projeto, inicie o Codegen:
 
 ```powershell
 npx playwright codegen http://localhost:3000
 ```
 
-No navegador aberto pelo Codegen, siga este fluxo:
-
-1. Abra **Ambientes e equipamentos**.
-2. Localize a **Sala Frevo** e clique em **Reservar**.
-3. Preencha o formulário de nova reserva.
+No navegador aberto:
+1. Clique em **Ambientes e equipamentos**.
+2. Localize o card da **Sala Frevo** e clique em **Reservar**.
+3. Preencha os campos obrigatórios no diálogo de reserva.
 4. Clique em **Confirmar reserva**.
-5. Encerre a gravação e revise o código no Playwright Inspector.
+5. Encerre o navegador ou pare o processo no terminal.
 
-### 5.3. Salvar, revisar e executar
+### 8.3. Refinar com a skill de IA
 
-Copie o código gerado para um novo arquivo em `e2e/`, por exemplo `e2e/reserva-frevo.spec.ts`. Antes de executar, revise as ações e acrescente uma asserção que verifique o resultado, como a mensagem de confirmação ou a reserva em **Minhas reservas**.
-
-Execute somente esse arquivo em Chromium:
-
-```powershell
-npx playwright test e2e/reserva-frevo.spec.ts --project=chromium
-```
-
-O Codegen grava ações; não conhece sozinho todas as regras do negócio. Verifique se o teste realmente confirma o comportamento esperado, se os dados ainda são válidos e se há alguma ação desnecessária.
-
-> **Atenção aos dados:** o fluxo real de confirmação grava uma reserva no SQLite. Repetir a mesma reserva pode causar conflito de horário. Use dados controlados de teste e não execute o comando de reset contra uma base que contenha dados importantes.
+Copie o trecho de código gerado e acione o seu assistente de IA configurado com a skill `novo-teste-playwright`. O assistente substituirá campos literais por Faker, adicionará asserções de confirmação do banner de sucesso e estruturará o arquivo em `e2e/`.
 
 ![Playwright Codegen gravando o fluxo de reserva do AgendaLab e mostrando os localizadores gerados no Inspector](image.png)
 
 ---
 
-## 6. Tutorial: explorar a aplicação com MCP
+## 9. Tutorial: explorar a aplicação com MCP
 
-O **Playwright MCP** expõe ferramentas de navegador através do Model Context Protocol. Um assistente compatível pode abrir páginas, ler snapshots de acessibilidade, interagir com controles e observar mensagens do console. No AgendaLab, o MCP ajuda a conhecer o fluxo antes de escrever o teste automatizado.
+O **Playwright MCP** expõe recursos de automação de navegador através do Model Context Protocol. Um assistente com suporte a MCP pode abrir páginas, inspecionar árvores de acessibilidade, clicar em controles e observar o console do navegador diretamente.
 
-### 6.1. O que é necessário
-
-- Node.js instalado e disponível no terminal.
-- Um cliente que suporte servidores MCP, como um IDE ou assistente compatível.
-- A aplicação AgendaLab iniciada em `http://localhost:3000`.
-- Acesso à internet na primeira execução para o `npx` baixar o servidor MCP e o navegador Playwright, se ainda não estiverem disponíveis localmente.
-
-Este repositório já contém `.mcp.json` com a configuração do servidor:
+A configuração do servidor MCP para o frontend do projeto já está presente em `apps/web/.mcp.json`:
 
 ```json
 {
@@ -245,218 +402,191 @@ Este repositório já contém `.mcp.json` com a configuração do servidor:
 }
 ```
 
-O arquivo usa o formato de configuração do servidor Playwright MCP. O modo de carregar a configuração varia conforme o cliente. Se o seu IDE não reconhecer `.mcp.json` automaticamente, adicione a mesma definição nas configurações MCP específicas do cliente e reinicie ou recarregue o servidor.
+### Como explorar
 
-### 6.2. Iniciar e usar o MCP
+1. Inicie a aplicação com `npm run dev`.
+2. Certifique-se de que o seu cliente MCP (IDE ou ferramenta compatível) esteja conectado ao servidor `playwright`.
+3. Solicite ao assistente que inspecione a tela:
+   > *"Acesse http://localhost:3000 com o Playwright MCP, abra o modal de Nova Reserva e liste todos os campos visíveis e obrigatórios."*
+4. O assistente navegará e relatará o comportamento dos componentes sem que você precise inspecionar manualmente o HTML.
 
-1. No terminal do projeto, inicie a aplicação com `npm run dev` e deixe-a ativa.
-2. No seu cliente MCP, confirme que o servidor `playwright` está conectado. Se acabou de adicioná-lo, reinicie ou recarregue os servidores MCP do cliente.
-3. Peça ao assistente para abrir o endereço e investigar um cenário específico. Por exemplo:
-
-   > Acesse `http://localhost:3000/` com o Playwright MCP. Explore o fluxo de nova reserva, identifique os campos e as validações e depois proponha um teste em `e2e/` com asserções para cada resultado.
-
-4. O MCP navega, retorna o estado acessível da página e usa esses dados para localizar os controles. O assistente pode interagir e consultar o estado atualizado após cada ação.
-5. Revise o fluxo observado e o teste escrito. Execute o teste com Playwright Test, como descrito na [seção 8](#8-executar-e-investigar-os-testes).
-
-Se o MCP não iniciar, confira se o cliente aceita o formato do `.mcp.json`, se o Node está no `PATH`, se `npx` consegue baixar o pacote e se o cliente mostra erros de inicialização. Para o fluxo da aplicação, confira também se `npm run dev` continua ativo e se `http://localhost:3000` abre no navegador.
-
-### 6.3. O que observar durante a exploração
-
-- Quais campos aparecem e quais são obrigatórios.
-- Como opções e condições mudam a interface.
-- Que mensagem é mostrada depois do envio.
-- Se há erros no console ou na comunicação com a API.
-- Se a ação cria ou altera dados persistentes.
-
-O MCP é uma sessão de exploração. As referências temporárias dos elementos e o estado do navegador não devem ser tratados como parte do teste final. O arquivo Playwright deve navegar até o endereço e preparar, por conta própria, os dados e a sessão de que precisa.
-
-> **Atenção aos dados:** explorar uma página pode executar ações reais na aplicação. Confirmar uma reserva pelo MCP cria um registro no SQLite. Para apenas entender o formulário, não envie a reserva; se precisar testar o fluxo completo, use dados de teste e planeje a limpeza.
-
-Consulte a [introdução oficial ao Playwright MCP](https://playwright.dev/mcp/introduction) e a [instalação e primeiros passos](https://playwright.dev/mcp/installation).
+> **Atenção aos dados:** Lembrar que ações no MCP que confirmem formulários reais gravam registros no banco local. Para apenas mapear a interface, não submeta dados persistentes.
 
 ---
 
-## 7. MCP ou Codegen: quando usar cada um
+## 10. Codegen, MCP ou Skill de IA: quando usar cada um
 
-As ferramentas ajudam a começar; nenhuma substitui a revisão do teste e a execução com Playwright Test.
-
-| Situação | Mais útil | Por quê |
+| Ferramenta / Abordagem | Quando usar | Vantagem principal |
 | --- | --- | --- |
-| Você ainda não conhece o fluxo ou os estados da tela | MCP | O assistente explora a interface e pode resumir campos, opções e mensagens |
-| Você sabe o caminho e quer gravar as ações do navegador | Codegen | Você percorre o fluxo e vê os localizadores gerados no Inspector |
-| Uma tela muda conforme escolhas do usuário | MCP ou Codegen | Explore primeiro com MCP ou grave as variantes; depois confirme cada comportamento com asserções |
-| Você quer aprender o código Playwright passo a passo | Codegen | As ações aparecem como código que pode ser estudado e simplificado |
-| Você precisa criar cenários com muitos dados, regras ou reutilização | Código Playwright revisado | Fixtures, funções auxiliares e testes orientados a dados ficam mais claros em código mantido manualmente |
-| Você precisa rodar a regressão no CI | Playwright Test | A suíte automatizada é reproduzível e pode ser integrada ao fluxo de desenvolvimento |
-
-Um fluxo de trabalho prático é:
-
-1. **Explorar:** use MCP quando precisar entender a página ou descobrir variantes.
-2. **Rascunhar:** use Codegen para registrar uma jornada conhecida, ou peça ao assistente que monte um primeiro teste a partir do cenário observado.
-3. **Revisar:** escolha localizadores claros, remova passos desnecessários e acrescente asserções ligadas à regra de negócio.
-4. **Preparar os dados:** decida se o teste usará uma API real, uma resposta simulada ou uma base de teste isolada.
-5. **Executar:** rode o arquivo com Playwright Test e confira o resultado antes de considerar o cenário pronto.
-
-Para testes confiáveis, prefira verificar resultados visíveis, isolar cada cenário, controlar os dados e evitar dependências externas. Consulte as [boas práticas oficiais](https://playwright.dev/docs/best-practices).
+| **Playwright Codegen** | Para mapear rapidamente os seletores e cliques de uma jornada conhecida pelo usuário | Rapidez para capturar sequências de interação no navegador |
+| **Playwright MCP** | Para permitir que o assistente explore dinamicamente telas e estados sem intervenção manual | Descoberta guiada por IA do comportamento da interface |
+| **Skill `novo-teste-playwright`** | Para transformar o rascunho gravado em código final de produção para a suíte E2E | Aplicação de regras de negócio, asserções robustas, Faker e boas práticas |
+| **Playwright Test CLI (`npm test`)** | Para validação contínua, regressão automatizada e hooks de CI / pré-commit | Execução reproduzível, paralela e sem intervenção humana |
 
 ---
 
-## 8. Executar e investigar os testes
+## 11. Executar e investigar os testes
 
-A aplicação precisa estar rodando em outro terminal para executar os testes existentes, pois `webServer` e `baseURL` não estão habilitados na configuração atual.
+Para executar os testes locais, a aplicação precisa estar em execução (`npm run dev`), pois os testes apontam para `http://localhost:3000/`.
 
-Execute a suíte completa nos projetos configurados:
+### Comandos de execução
+
+Executar toda a suíte de testes E2E (via script npm configurado):
+
+```powershell
+npm test
+```
+
+Executar a suíte diretamente via Playwright CLI:
 
 ```powershell
 npx playwright test
 ```
 
-Execute somente em Chromium:
+Executar apenas em um navegador específico (ex.: Chromium):
 
 ```powershell
 npx playwright test --project=chromium
 ```
 
-Execute um arquivo específico:
+Executar um arquivo de teste específico:
 
 ```powershell
 npx playwright test e2e/new-reservation-variants.spec.ts --project=chromium
 ```
 
-Abra a UI do Playwright para escolher testes e acompanhar a execução:
+Executar em modo interativo com interface gráfica (Playwright UI Mode):
 
 ```powershell
-npx playwright test --ui
+npm run test:ui
 ```
 
-Ao final, o Playwright exibe o resumo no terminal e gera o relatório HTML. Para abrir o relatório mais recente:
+### Diagnóstico e relatórios
+
+Após a execução, o relatório em HTML pode ser visualizado no navegador:
 
 ```powershell
 npx playwright show-report
 ```
 
-Os traces ajudam a investigar falhas com uma linha do tempo de ações, snapshots e informações do navegador. Nesta configuração, o trace é mantido quando um teste falha.
-
-Se os navegadores Playwright ainda não estiverem instalados nessa máquina, execute `npx playwright install`. Consulte a [documentação da linha de comando](https://playwright.dev/docs/test-cli) e do [modo UI](https://playwright.dev/docs/test-ui-mode).
+O projeto está configurado em [playwright.config.ts](playwright.config.ts) com `trace: "retain-on-failure"`. Quando um teste falha, um arquivo de trace detalhado é retido para depuração passo a passo com capturas de tela e snapshots de rede.
 
 ---
 
-## 9. Testes E2E existentes
+## 12. Testes E2E existentes
 
-Os testes ficam em `e2e/`:
+A suíte oficial fica localizada no diretório [e2e/](e2e/):
 
-| Arquivo | Cenário | Dados e observações |
+| Arquivo de teste | Cenários cobertos | Estratégia de dados e mocks |
 | --- | --- | --- |
-| `e2e/reservation.spec.ts` | Gera uma data e um horário, consulta a disponibilidade, escolhe uma sala livre e confirma a reserva | Usa a API local; título, observações e participantes são gerados com Faker. A reserva é persistida no SQLite. |
-| `e2e/new-reservation-variants.spec.ts` | Testa reunião interna, atendimento externo, capacitação e validações do formulário | Datas, horários e campos de texto variam com Faker. Os casos de sucesso simulam a resposta de criação; as validações negativas não criam reservas. |
+| [e2e/new-reservation-variants.spec.ts](e2e/new-reservation-variants.spec.ts) | - Variações válidas de reserva: reunião interna, atendimento externo (com órgão visitante obrigatório) e capacitação (com tema).<br>- Seleção de equipamento (projetor) e ocultação do campo de participantes.<br>- Validações negativas de formulário: horário de término anterior ao início, título em branco/inválido, obrigatoriedade de campos condicionais.<br>- Conflito de horário retornado pela API (HTTP 409). | Utiliza `fakerPT_BR` para títulos, datas futuras e textos.<br>Usa `page.route` para simular as respostas da API (`POST **/reservations`), garantindo testes rápidos, determinísticos e sem poluição do banco SQLite. |
 
-Os casos de sucesso da spec de variantes verificam o comportamento da interface diante de uma resposta de sucesso simulada. Eles não verificam o salvamento na API ou no banco. A spec `reservation.spec.ts` cobre a confirmação com a API local e grava dados persistentes.
+---
 
-Esse arranjo permite estudar dois tipos de teste: fluxos de interface com dependências simuladas e um fluxo que passa pela API local. Em uma suíte de trabalho, deixe explícito o que cada teste valida e prepare uma estratégia para criar e remover dados de integração.
+## 13. Dados variáveis com Faker
 
-### Dados variáveis com Faker
+O `@faker-js/faker` gera dados pseudo-aleatórios realistas diretamente no código do teste, dispensando serviços externos e evitando que execuções consecutivas colidam por valores repetidos.
 
-O **Faker** é uma biblioteca JavaScript que gera dados fictícios no próprio teste. Apesar de às vezes ser chamado de “Faker API”, seu uso neste projeto não faz chamadas HTTP nem depende de um serviço externo: importamos a biblioteca e chamamos seus métodos no código.
+### Importação padronizada
 
-Ele ajuda a evitar dados repetidos entre execuções, como títulos fixos que já existem no banco, nomes duplicados e datas sempre iguais. Isso deixa os testes mais flexíveis e reduz colisões acidentais. Faker não substitui uma estratégia de isolamento e limpeza: um teste integrado ainda grava dados no SQLite, e execuções concorrentes podem disputar o mesmo recurso e horário.
-
-A abordagem deste projeto é direta: primeiro escreva o teste e entenda o cenário; depois, substitua manualmente os dados que podem variar por chamadas Faker no próprio arquivo. Não é necessário criar um helper ou uma camada adicional. O locale `fakerPT_BR` gera dados localizados em português quando há suporte para o método utilizado.
-
-Importe o locale em cada spec que precisar gerar dados:
-
-```ts
+```typescript
 import { fakerPT_BR as faker } from "@faker-js/faker";
 ```
 
-### Métodos mais usados
+### Métodos recomendados no projeto
 
-Não é necessário usar todos esses métodos em cada teste. Escolha o que corresponde ao campo e às regras do cenário:
-
-| Método | Uso típico no teste | Exemplo |
+| Método | Finalidade | Exemplo de uso |
 | --- | --- | --- |
-| `faker.string.uuid()` | Criar um identificador único para títulos e dados de teste | `` `Reserva ${faker.string.uuid()}` `` |
-| `faker.date.future()` | Gerar uma data futura para agendamentos | `faker.date.future({ years: 1 })` |
-| `faker.date.between()` | Gerar uma data dentro de limites escolhidos | `faker.date.between({ from, to })` |
-| `faker.number.int()` | Gerar uma quantidade dentro de uma faixa válida | `faker.number.int({ min: 1, max: capacity })` |
-| `faker.lorem.sentence()` | Gerar observações ou descrições fictícias | `faker.lorem.sentence()` |
-| `faker.company.name()` | Gerar nome fictício de empresa ou entidade visitante | `faker.company.name()` |
-| `faker.person.fullName()` | Gerar nome fictício de uma pessoa | `faker.person.fullName()` |
-| `faker.internet.email()` | Gerar e-mail para campos de cadastro | `faker.internet.email()` |
-
-Um exemplo semelhante ao que aparece nas specs deste projeto:
-
-```ts
-const title = `Reserva de teste ${faker.string.uuid()}`;
-const notes = faker.lorem.sentence();
-const visitorOrganization = faker.company.name();
-const participants = faker.number.int({ min: 1, max: capacity });
-const date = faker.date.future({ years: 1 }).toISOString().slice(0, 10);
-```
-
-`faker.date.future()` é a opção direta quando o sistema exige uma data futura. `faker.date.between({ from, to })` é útil quando o cenário exige limites específicos; `from` e `to` podem ser objetos `Date`, strings ou timestamps UNIX. Um intervalo como `2000-01-01` até agora pode gerar uma data passada, então só serve para cenários que aceitem datas históricas.
-
-Para gerar um horário válido de uma hora dentro do expediente, o próprio teste pode escolher o início e calcular o término:
-
-```ts
-const startHour = faker.number.int({ min: 8, max: 16 });
-const start = `${String(startHour).padStart(2, "0")}:00`;
-const end = `${String(startHour + 1).padStart(2, "0")}:00`;
-```
-
-Na reserva integrada, o teste consulta a disponibilidade para a data e o horário gerados antes de escolher uma sala. Isso evita depender sempre da data padrão ou tentar reservar uma sala que já aparece ocupada. A reserva é persistida no SQLite; Faker reduz colisões por títulos e dados repetidos, mas não garante sozinho que nenhuma execução concorrente use o mesmo intervalo. Em uma suíte compartilhada, use também uma base isolada por execução ou uma estratégia para criar e limpar os dados.
-
-Mantenha fixos os valores que definem o cenário, como os tipos de solicitação e organizações aceitos pelo sistema, além dos horários intencionalmente inválidos em testes de validação. Gere os campos variáveis: título, observações, entidade visitante, data e quantidade de participantes. Nos casos de capacidade máxima, use o limite da sala em vez de um número aleatório.
-
-### Recomendações para os testes
-
-1. **Gere dados que precisam ser únicos.** Use UUID em títulos, e-mails ou identificadores quando valores duplicados puderem conflitar com dados já persistidos.
-2. **Respeite as regras do campo.** Limite números à faixa aceita, gere datas no passado ou futuro conforme o cenário e monte horários compatíveis com as regras do sistema.
-3. **Mantenha explícitos os dados que definem o caso.** Tipos de solicitação, organizações aceitas e valores intencionalmente inválidos devem continuar fixos para o teste deixar claro o comportamento verificado.
-4. **Não randomize limites de negócio.** Para testar capacidade máxima, use o limite informado pela sala; para testar um valor inválido específico, escreva esse valor diretamente.
-5. **Investigue falhas com os dados reais da execução.** O trace do Playwright ajuda a ver o que foi preenchido. Fixar uma seed do Faker torna a sequência de valores reproduzível, mas também faz os dados se repetirem entre execuções que usam a mesma seed.
-
-Veja também a seção de [referências](#11-referências), com links para o guia e para a documentação oficial dos métodos usados.
+| `faker.string.uuid()` | Identificador único para títulos de reserva | `` `Reserva ${faker.string.uuid()}` `` |
+| `faker.date.future()` | Data futura para agendamento | `faker.date.future({ years: 1 }).toISOString().slice(0, 10)` |
+| `faker.number.int()` | Quantidade válida de participantes dentro do limite | `faker.number.int({ min: 1, max: resourceCapacity })` |
+| `faker.lorem.sentence()` | Observações e justificativas | `faker.lorem.sentence()` |
+| `faker.company.name()` | Nome de órgão ou entidade externa visitante | `faker.company.name()` |
+| `faker.person.fullName()` | Nome de colaborador ou responsável | `faker.person.fullName()` |
+| `faker.internet.email()` | E-mail corporativo de contato | `faker.internet.email()` |
 
 ---
 
-## 10. Como aplicar a ideia no trabalho
+## 14. Validação e processo de commit (Husky)
 
-O AgendaLab ajuda a apresentar uma proposta de automação sem prometer que uma gravação rápida substitui o planejamento dos testes. Para adaptar a abordagem a um sistema real:
+O repositório utiliza o **Husky** para garantir que nenhum código que quebre os testes seja introduzido na base principal.
 
-1. Escolha poucos fluxos críticos, como login, cadastro, aprovação ou consulta.
-2. Defina o resultado esperado de cada fluxo antes de automatizar.
-3. Explore a interface com MCP ou Codegen para reduzir o tempo de descoberta.
-4. Transforme os rascunhos em testes legíveis com asserções de negócio.
-5. Use dados e contas próprias para teste, em um ambiente controlado.
-6. Integre uma seleção representativa da suíte ao CI e amplie a cobertura aos poucos.
+### Comportamento do hook `pre-commit`
 
-Com o crescimento da suíte, organize preparação de dados e autenticação em fixtures reutilizáveis, mantenha cenários independentes e acompanhe falhas recorrentes. Os testes E2E são mais valiosos quando cobrem jornadas importantes; regras isoladas podem ser verificadas em testes de API ou unidade, mais rápidos e focados.
+O arquivo [.husky/pre-commit](.husky/pre-commit) está configurado com:
+
+```sh
+#!/usr/bin/env sh
+npx playwright test
+```
+
+Isso significa que, sempre que o comando `git commit` for executado:
+1. O Git aciona o Husky.
+2. O Husky executa a suíte de testes com `npx playwright test`.
+3. Se todos os testes passarem (código de saída 0), o commit é concluído.
+4. Se qualquer teste falhar, o commit é imediatamente abortado, exibindo as falhas no terminal.
+
+> **Importante para o desenvolvedor:** Como os testes do Playwright necessitam se comunicar com a interface web em `http://localhost:3000`, mantenha o servidor ativo (`npm run dev`) antes de disparar o comando de commit.
 
 ---
 
-## 11. Referências
+## 15. Referência rápida
 
-- [Playwright: instalação e introdução](https://playwright.dev/docs/intro)
-- [Playwright: localizadores](https://playwright.dev/docs/locators)
-- [Playwright: asserções](https://playwright.dev/docs/test-assertions)
-- [Playwright: boas práticas](https://playwright.dev/docs/best-practices)
-- [Playwright: Codegen](https://playwright.dev/docs/codegen)
+| Ação desejada | Comando / Procedimento |
+| --- | --- |
+| Iniciar frontend e backend | `npm run dev` |
+| Iniciar apenas o backend | `npm run dev -w @agendalab/api` |
+| Iniciar apenas o frontend | `npm run dev -w @agendalab/web` |
+| Resetar reservas locais | `npm run db:reset` |
+| Executar todos os testes E2E | `npm test` *(ou `npx playwright test`)* |
+| Executar um teste específico | `npx playwright test e2e/new-reservation-variants.spec.ts --project=chromium` |
+| Executar com interface gráfica | `npm run test:ui` |
+| Visualizar relatório HTML | `npx playwright show-report` |
+| Gravar novo fluxo no navegador | `npx playwright codegen http://localhost:3000` |
+| Invocar skill no Antigravity | Comando `/novo-teste-playwright` ou referenciar `.agent/skills/novo-teste-playwright/SKILL.md` |
+| Configurar skill no Claude Code | Seguir as instruções de [docs/skills/outros-agentes.md](docs/skills/outros-agentes.md) |
+
+---
+
+## 16. Links para documentação interna
+
+Para navegar rapidamente pelos arquivos de configuração e diretrizes do repositório:
+
+- [playwright.config.ts](playwright.config.ts) — Configuração do Playwright Test (diretórios, repórteres, timeouts, projetos).
+- [e2e/](e2e/) — Pasta onde ficam centralizados todos os testes end-to-end do projeto.
+- [.agent/skills/novo-teste-playwright/SKILL.md](.agent/skills/novo-teste-playwright/SKILL.md) — Instruções completas da skill de IA para geração e refatoração de testes.
+- [docs/skills/outros-agentes.md](docs/skills/outros-agentes.md) — Guia de configuração e sincronização da skill no Claude Code e outros agentes.
+- [.husky/pre-commit](.husky/pre-commit) — Script do hook de validação pré-commit.
+- [apps/api/.env.example](apps/api/.env.example) — Variáveis de ambiente configuráveis para a API NestJS.
+- [apps/web/.env.example](apps/web/.env.example) — Variáveis de ambiente configuráveis para o frontend Next.js.
+
+---
+
+## 17. Como aplicar a ideia no trabalho
+
+O AgendaLab foi idealizado para demonstrar como modernizar o processo de testes em equipes de desenvolvimento:
+
+1. **Comece pelos fluxos críticos:** selecione as jornadas essenciais (agendamento, cadastro, aprovação).
+2. **Acelere o rascunho:** use o Codegen para capturar as interações e seletores básicos.
+3. **Refine com IA e skills:** utilize agentes guiados por regras claras para adicionar asserções reais de negócio, tratamento de erros e dados dinâmicos com Faker.
+4. **Isole responsabilidades:** combine testes com mock (`page.route`) para respostas instantâneas e testes integrados para validar a persistência.
+5. **Proteja a base de código:** configure hooks de `pre-commit` e pipelines de CI para validar a suíte automaticamente.
+
+---
+
+## 18. Referências
+
+- [Playwright: documentação oficial](https://playwright.dev/docs/intro)
+- [Playwright: boas práticas de teste](https://playwright.dev/docs/best-practices)
+- [Playwright: seletores e Locators](https://playwright.dev/docs/locators)
+- [Playwright: asserções de teste](https://playwright.dev/docs/test-assertions)
+- [Playwright: gravação com Codegen](https://playwright.dev/docs/codegen)
 - [Playwright: modo UI](https://playwright.dev/docs/test-ui-mode)
-- [Playwright: linha de comando](https://playwright.dev/docs/test-cli)
-- [Playwright MCP: introdução](https://playwright.dev/mcp/introduction)
-- [Faker: guia de uso](https://fakerjs.dev/guide/usage.html)
+- [Playwright: CLI e comandos](https://playwright.dev/docs/test-cli)
+- [Playwright MCP: visão geral](https://playwright.dev/mcp/introduction)
+- [Faker: documentação oficial](https://fakerjs.dev/guide/usage.html)
 - [Faker: locale Português do Brasil](https://fakerjs.dev/locales/pt_br)
-- [Faker: datas futuras (`date.future`)](https://fakerjs.dev/api/date.html#future)
-- [Faker: datas entre limites (`date.between`)](https://fakerjs.dev/api/date.html#between)
-- [Faker: strings e UUID (`string.uuid`)](https://fakerjs.dev/api/string.html#uuid)
-- [Faker: números (`number.int`)](https://fakerjs.dev/api/number.html#int)
-- [Faker: textos (`lorem.sentence`)](https://fakerjs.dev/api/lorem.html#sentence)
-- [Faker: empresas (`company.name`)](https://fakerjs.dev/api/company.html#name)
-- [Faker: pessoas (`person.fullName`)](https://fakerjs.dev/api/person.html#fullname)
-- [Faker: internet e e-mail (`internet.email`)](https://fakerjs.dev/api/internet.html#email)
-- [Playwright MCP: instalação](https://playwright.dev/mcp/installation)
-- [Next.js: documentação](https://nextjs.org/docs)
-- [NestJS: documentação](https://docs.nestjs.com)
-- [NestJS: Swagger e OpenAPI](https://docs.nestjs.com/openapi/introduction)
-- [UI GovPE: componentes](https://www.npmjs.com/package/@uigovpe/components)
-- [UI GovPE: estilos](https://www.npmjs.com/package/@uigovpe/styles)
+- [Husky: documentação oficial](https://typicode.github.io/husky/)
+- [Next.js: documentação oficial](https://nextjs.org/docs)
+- [NestJS: documentação oficial](https://docs.nestjs.com)
+- [UI Kit GovPE: documentação de componentes](https://www.npmjs.com/package/@uigovpe/components)
