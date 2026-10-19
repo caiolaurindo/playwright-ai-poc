@@ -1,5 +1,5 @@
 # AgendaLab: laboratório de testes automatizados com Playwright
-
+![alt text](image-1.png)
 Este repositório é um laboratório prático para aprender e aplicar **testes automatizados com Playwright**. A aplicação utilizada nos estudos é o **AgendaLab**, um sistema de reserva de ambientes e equipamentos compartilhados: salas de reunião, projetores e notebooks.
 
 A proposta é construir o aprendizado por etapas: conhecer os fluxos da aplicação, escrever testes E2E robustos, utilizar agentes de IA guiados por skills especializadas e seguir um fluxo consistente de validação e qualidade antes de cada commit. Os cenários se aproximam de sistemas administrativos do setor público, facilitando a aplicação dos conceitos no dia a dia.
