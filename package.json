@@ -20,7 +20,7 @@
     "test:staged": "node scripts/run-tagged-e2e.mjs --staged",
     "test:dry": "node scripts/run-tagged-e2e.mjs --dry-run",
     "test:ui": "playwright test --ui",
-    "prepare": "husky"
+    "prepare": "husky || true"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
