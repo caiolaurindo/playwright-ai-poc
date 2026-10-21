@@ -1,4 +1,4 @@
-import type { Collaborator } from "@agendalab/contracts";
+import type { Collaborator } from "./contracts";
 
 // Identidade fixa da POC. Não representa autenticação ou autorização real.
 export const DEMO_COLLABORATOR: Collaborator = {

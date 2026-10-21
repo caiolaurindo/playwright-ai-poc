@@ -2,7 +2,7 @@ import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import type { Resource, Reservation } from "@agendalab/contracts";
+import type { Resource, Reservation } from "../contracts";
 import { SEED_RESOURCES } from "./seed";
 
 interface ResourceRow extends Omit<Resource, "features" | "available"> {

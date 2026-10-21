@@ -2,11 +2,13 @@ function resolveApiUrl(path: string): string {
   const normalizedPath = path.startsWith("/") ? `/api${path}` : `/api/${path}`;
 
   if (typeof globalThis.window !== "undefined") {
-    return normalizedPath;
+    const publicBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
+    return publicBaseUrl ? `${publicBaseUrl}${normalizedPath}` : normalizedPath;
   }
 
-  const baseUrl = process.env.API_URL ?? "http://127.0.0.1:3001";
-  return new URL(normalizedPath, baseUrl).toString();
+  const serverBaseUrl =
+    process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3001";
+  return new URL(normalizedPath, serverBaseUrl).toString();
 }
 
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {

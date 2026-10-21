@@ -4,7 +4,7 @@ import type {
   Reservation,
   Resource,
   ResourceType,
-} from "@agendalab/contracts";
+} from "../contracts";
 
 export class HealthResponseDto {
   @ApiProperty({ example: "ok" })

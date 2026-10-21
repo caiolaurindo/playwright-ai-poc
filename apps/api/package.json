@@ -10,7 +10,6 @@
     "db:reset": "node --env-file-if-exists=.env ./scripts/reset-db.mjs"
   },
   "dependencies": {
-    "@agendalab/contracts": "*",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-express": "12.1.2",

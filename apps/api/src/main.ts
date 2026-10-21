@@ -6,6 +6,10 @@ import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim()).filter(Boolean)
+    : true;
+  app.enableCors({ origin: corsOrigins });
   app.setGlobalPrefix("api");
   app.useGlobalPipes(
     new ValidationPipe({
@@ -40,7 +44,7 @@ async function bootstrap() {
   );
   await app.listen(
     Number(process.env.PORT ?? 3001),
-    process.env.HOST ?? (process.env.VERCEL ? "0.0.0.0" : "127.0.0.1"),
+    process.env.HOST ?? "0.0.0.0",
   );
 }
 void bootstrap();
