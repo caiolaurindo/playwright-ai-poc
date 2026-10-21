@@ -539,17 +539,6 @@ function main() {
     }
   }
 
-  console.log("\n🔍 Testes E2E envolvidos (com tag igual ou conectada):");
-  for (const spec of involvedSpecs) {
-    console.log(
-      `   📄 ${spec.relativePath} (${spec.matchingTests.length}/${spec.tests.length} blocos de teste):`,
-    );
-    for (const t of spec.matchingTests) {
-      const tagLabel = t.tags.length > 0 ? `[${t.tags.join(", ")}]` : "[sem tag]";
-      console.log(`      ✓ ${t.title} ${tagLabel}`);
-    }
-  }
-
   const skippedCount = totalTestsInSuite - totalInvolvedTests;
   console.log(
     `\n📊 Resumo: selecionados ${totalInvolvedTests} de ${totalTestsInSuite} blocos de teste (${skippedCount} fora do escopo foram poupados).`,
