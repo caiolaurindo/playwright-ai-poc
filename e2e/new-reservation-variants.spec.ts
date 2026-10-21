@@ -35,7 +35,7 @@ const reservationCases = [
 
 test.setTimeout(60_000);
 
-test.describe("Nova reserva: variações válidas", () => {
+test.describe("Nova reserva: variações válidas @reservas", () => {
   for (const reservationCase of reservationCases) {
     test(`confirma ${reservationCase.name}`, async ({ page }) => {
       const date = faker.date.future({ years: 1 }).toISOString().slice(0, 10);
@@ -173,7 +173,7 @@ test.describe("Nova reserva: variações válidas", () => {
     });
   }
 
-  test("oculta o campo de participantes ao selecionar um equipamento", async ({
+  test("oculta o campo de participantes ao selecionar um equipamento @catalogo", async ({
     page,
   }) => {
     await page.goto("http://localhost:3000/");
@@ -192,7 +192,7 @@ test.describe("Nova reserva: variações válidas", () => {
   });
 });
 
-test.describe("Nova reserva: validações", () => {
+test.describe("Nova reserva: validações @reservas @validacoes", () => {
   test("impede confirmar uma reserva quando o término antecede o início", async ({
     page,
   }) => {

@@ -16,6 +16,9 @@
     "start": "concurrently --kill-others -n API,WEB -c cyan,blue \"npm run start -w @agendalab/api\" \"npm run start -w @agendalab/web\"",
     "db:reset": "npm run db:reset -w @agendalab/api",
     "test": "playwright test",
+    "test:tagged": "node scripts/run-tagged-e2e.mjs",
+    "test:staged": "node scripts/run-tagged-e2e.mjs --staged",
+    "test:dry": "node scripts/run-tagged-e2e.mjs --dry-run",
     "test:ui": "playwright test --ui",
     "prepare": "husky"
   },

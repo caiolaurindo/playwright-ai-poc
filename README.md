@@ -513,18 +513,19 @@ O repositório utiliza o **Husky** para garantir que nenhum código que quebre o
 
 ### Comportamento do hook `pre-commit`
 
-O arquivo [.husky/pre-commit](.husky/pre-commit) está configurado com:
+O arquivo [.husky/pre-commit](.husky/pre-commit) está configurado com o seletor inteligente de testes por tags ([scripts/run-tagged-e2e.mjs](scripts/run-tagged-e2e.mjs)):
 
 ```sh
 #!/usr/bin/env sh
-npx playwright test
+node scripts/run-tagged-e2e.mjs --staged
 ```
 
 Isso significa que, sempre que o comando `git commit` for executado:
 1. O Git aciona o Husky.
-2. O Husky executa a suíte de testes com `npx playwright test`.
-3. Se todos os testes passarem (código de saída 0), o commit é concluído.
-4. Se qualquer teste falhar, o commit é imediatamente abortado, exibindo as falhas no terminal.
+2. O script analisa os arquivos em *stage* (`git diff --cached`), identifica as tags dos testes alterados (ex.: `@catalogo`, `@reservas`, `@validacoes`, `@usuario`) ou dos módulos de código-fonte conectados.
+3. Localiza todos os testes na pasta `e2e/` que possuem a mesma tag ou conexão e executa `npx playwright test <arquivos> --grep "<tags>"`.
+4. Se apenas arquivos sem relação com fluxos E2E forem alterados (ex.: documentação), o commit prossegue sem rodar o navegador.
+5. Se todos os testes relacionados passarem (código de saída 0), o commit é concluído; caso contrário, o commit é abortado.
 
 > **Importante para o desenvolvedor:** Como os testes do Playwright necessitam se comunicar com a interface web em `http://localhost:3000`, mantenha o servidor ativo (`npm run dev`) antes de disparar o comando de commit.
 

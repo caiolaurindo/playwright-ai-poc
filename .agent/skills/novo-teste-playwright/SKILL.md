@@ -208,7 +208,7 @@ Se houver necessidade de agrupar cenários, utilize tags semânticas no título 
 - `@validacoes` para testes de regras de validação e caminhos negativos.
 - `@catalogo` para consulta de disponibilidade e filtros.
 
-Lembre-se de que o hook de `pre-commit` (Husky) executa `npm test` (`playwright test`). Todos os testes em `e2e/` devem passar sem falhas e sem timeouts para permitir que os commits sejam realizados.
+Lembre-se de que o hook de `pre-commit` (Husky) executa `node scripts/run-tagged-e2e.mjs --staged`, que identifica as tags dos arquivos alterados e executa apenas os testes em `e2e/` que compartilham a mesma tag ou conexão. Todos os testes relacionados devem passar sem falhas e sem timeouts para permitir que os commits sejam realizados.
 
 ## 9. Executar e validar os testes
 
