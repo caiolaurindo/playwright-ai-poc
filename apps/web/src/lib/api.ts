@@ -1,7 +1,18 @@
+function resolveApiUrl(path: string): string {
+  const normalizedPath = path.startsWith("/") ? `/api${path}` : `/api/${path}`;
+
+  if (typeof globalThis.window !== "undefined") {
+    return normalizedPath;
+  }
+
+  const baseUrl = process.env.API_URL ?? "http://127.0.0.1:3001";
+  return new URL(normalizedPath, baseUrl).toString();
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`/api${path}`, {
+    response = await fetch(resolveApiUrl(path), {
       ...init,
       headers: { "Content-Type": "application/json", ...init?.headers },
       cache: "no-store",

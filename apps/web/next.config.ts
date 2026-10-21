@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const config: NextConfig = {
   transpilePackages: ["@uigovpe/components"],
   async rewrites() {
+    if (process.env.VERCEL) {
+      return [];
+    }
     return [
       {
         source: "/api/:path*",

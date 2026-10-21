@@ -38,6 +38,9 @@ async function bootstrap() {
       swaggerOptions: { displayRequestDuration: true, validatorUrl: null },
     },
   );
-  await app.listen(Number(process.env.PORT ?? 3001), "127.0.0.1");
+  await app.listen(
+    Number(process.env.PORT ?? 3001),
+    process.env.HOST ?? (process.env.VERCEL ? "0.0.0.0" : "127.0.0.1"),
+  );
 }
 void bootstrap();

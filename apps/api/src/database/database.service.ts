@@ -15,9 +15,10 @@ export class DatabaseService implements OnModuleDestroy {
   readonly db: DatabaseSync;
 
   constructor() {
-    const path = resolve(
-      process.env.DATABASE_PATH ?? "./data/agendalab.sqlite",
-    );
+    const defaultDbPath = process.env.VERCEL
+      ? "/tmp/agendalab.sqlite"
+      : "./data/agendalab.sqlite";
+    const path = resolve(process.env.DATABASE_PATH ?? defaultDbPath);
     mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
     this.db.exec(`
